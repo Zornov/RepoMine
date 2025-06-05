@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory
 class LoggerFactoryBean {
 
     @Prototype
+    @Suppress("MnInjectionPoints")
     fun logger(injectionPoint: InjectionPoint<*>): Logger {
         val beanType = injectionPoint.declaringBean.beanType
         return LoggerFactory.getLogger(beanType)

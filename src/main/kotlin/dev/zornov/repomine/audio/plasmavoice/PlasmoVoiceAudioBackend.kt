@@ -2,7 +2,7 @@ package dev.zornov.repomine.audio.plasmavoice
 
 import dev.zornov.repomine.audio.api.AudioBackend
 import dev.zornov.repomine.audio.api.VolumeSetting
-import dev.zornov.repomine.ext.WavDecoder
+import dev.zornov.repomine.audio.api.WavDecoder
 import net.minestom.server.entity.Player
 import su.plo.voice.api.server.PlasmoVoiceServer
 import su.plo.voice.api.server.audio.line.ServerSourceLine

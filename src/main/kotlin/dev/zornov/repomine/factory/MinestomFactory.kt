@@ -11,6 +11,7 @@ import net.minestom.server.instance.InstanceManager
 import net.minestom.server.network.ConnectionManager
 import net.minestom.server.timer.SchedulerManager
 
+@Suppress("unused")
 @Factory
 class MinestomFactory {
 

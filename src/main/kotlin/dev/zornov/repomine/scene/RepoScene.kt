@@ -6,7 +6,7 @@ import dev.zornov.repomine.repo.SaleZone
 import net.minestom.server.instance.Instance
 
 class RepoScene(
-    val instance: Instance,
+    instance: Instance,
     saleZoneConfig: SaleZoneConfig
 ) {
     val players: MutableList<RepoPlayer> = mutableListOf()

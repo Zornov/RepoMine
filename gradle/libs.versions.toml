@@ -21,7 +21,6 @@ micronaut-inject-java        = { module = "io.micronaut:micronaut-inject-java", 
 logback-classic              = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 plasmovoice                  = { module = "su.plo.voice.api:server",       version.ref = "plasmovoice" }
 plasmovoice-minestom         = { module = "su.plo.voice.server:minestom",  version.ref = "plasmovoice" }
-quifft                       = { module = "org.quifft:quifft",             version.ref = "quifft" }
 
 [plugins]
 kotlin                       = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

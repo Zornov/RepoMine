@@ -12,12 +12,10 @@ class MusicPlayerContext(
     val volumeSettings: VolumeSetting,
     val player: Player
 ) : Runnable {
-    @Volatile
-    var running = true
 
     override fun run() {
         val startMs = System.currentTimeMillis()
-        while (running && player.isOnline && source.prepareNext()) {
+        while (player.isOnline && source.prepareNext()) {
             val frame: AudioFrame = source.getCurrent()
 
             val delay = (startMs + frame.frameStartMs - System.currentTimeMillis()).coerceAtLeast(0.0)
@@ -35,10 +33,5 @@ class MusicPlayerContext(
             }
             sink.playFrame(frame, vol, player, pos)
         }
-    }
-
-    fun stop() {
-        running = false
-        Thread.currentThread().interrupt()
     }
 }
