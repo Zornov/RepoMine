@@ -45,7 +45,6 @@ dependencies {
     implementation(libs.minestom)
     runtimeOnly(libs.logback.classic)
     implementation(libs.quifft)
-    implementation("com.github.kokorin.jaffree:jaffree:2024.08.29")
     compileOnly(libs.plasmovoice)
     implementation(libs.plasmovoice.minestom)
 }

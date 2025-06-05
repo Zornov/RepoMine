@@ -14,3 +14,4 @@ plugins {
 }
 
 rootProject.name = "RepoMine"
+include("quifft")

@@ -68,7 +68,7 @@ class VoiceListenerAddon : AddonInitializer {
         @EventSubscribe
         fun onClientFullyConnected(event: UdpClientConnectedEvent) {
             val playerId = event.connection.player.createPlayerInfo().playerId
-            playerAudio[playerId] = AudioType.PLASMAVOICE // TODO: SWAP
+            playerAudio[playerId] = AudioType.VANILLA // TODO: SWAP
         }
 
         @EventSubscribe
