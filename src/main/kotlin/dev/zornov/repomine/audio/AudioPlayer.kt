@@ -1,9 +1,9 @@
 package dev.zornov.repomine.audio
 
-import dev.zornov.repomine.audio.plasmavoice.MinestomPlasmaServer
-import dev.zornov.repomine.audio.plasmavoice.PlasmoVoiceAudioBackend
-import dev.zornov.repomine.audio.vanilla.VanillaAudioBackend
-import dev.zornov.repomine.audio.vanilla.sink.MinecraftNoteSink
+import dev.zornov.repomine.audio.api.AudioBackend
+import dev.zornov.repomine.audio.api.AudioType
+import dev.zornov.repomine.audio.api.VolumeSetting
+import dev.zornov.repomine.audio.api.getAudioType
 import dev.zornov.repomine.common.api.MinestomEvent
 import jakarta.inject.Singleton
 import net.minestom.server.entity.Player
@@ -13,43 +13,27 @@ import java.io.File
 import java.net.URI
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
-import java.util.concurrent.ConcurrentHashMap
 
 @Singleton
 class AudioPlayer(
-    minestomPlasmaServer: MinestomPlasmaServer,
-    val logger: Logger
+    val backends: Map<AudioType, AudioBackend>,
+    val logger: Logger,
+    val speechMemoryManager: SpeechMemoryManager
 ) : MinestomEvent<PlayerDisconnectEvent>() {
-    val playerThreads = ConcurrentHashMap<Player, MutableList<Thread>>()
-
-    val vanillaBackend = VanillaAudioBackend(
-        sink = MinecraftNoteSink(),
-        playerThreads = playerThreads
-    )
-    val plasmoBackend = PlasmoVoiceAudioBackend(
-        minestomPlasmaServer = minestomPlasmaServer,
-        playerThreads = playerThreads
-    )
-
-    val backends: Map<AudioType, AudioBackend> = mapOf(
-        AudioType.VANILLA to vanillaBackend,
-        AudioType.PLASMAVOICE to plasmoBackend
-    )
 
     override fun handle(event: PlayerDisconnectEvent) {
         stop(event.player)
+        speechMemoryManager.clearPlayer(event.player.uuid)
     }
 
     fun play(player: Player, file: File, volumeSettings: VolumeSetting) {
         val audioType = player.getAudioType()
-
         val backend = backends[audioType]
-            ?: run {
-                logger.error("No AudioBackend configured for type='{}'.", audioType)
-                player.sendMessage("Audio type $audioType is not supported.")
-                return
-            }
-
+        if (backend == null) {
+            logger.error("No AudioBackend configured for type='{}'.", audioType)
+            player.sendMessage("Audio type $audioType is not supported.")
+            return
+        }
         backend.playFile(player, file, volumeSettings)
     }
 
@@ -57,14 +41,14 @@ class AudioPlayer(
         try {
             val uri = URI.create(urlString)
             val url = uri.toURL()
-            val tempFile = Files.createTempFile("audio_stream_", ".wav").toFile().apply {
-                deleteOnExit()
-            }
+            val tempFile = Files
+                .createTempFile("audio_stream_", ".wav")
+                .toFile()
+                .apply { deleteOnExit() }
 
             url.openStream().use { input ->
                 Files.copy(input, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
             }
-
             play(player, tempFile, volumeSettings)
         } catch (e: IllegalArgumentException) {
             player.sendMessage("Invalid URL format: ${e.message}")
@@ -72,6 +56,17 @@ class AudioPlayer(
             logger.error("Failed to load audio from URL '{}': {}", urlString, e.message)
             player.sendMessage("Failed to load audio from URL: ${e.message}")
         }
+    }
+
+    fun play(player: Player, sampleArray: ShortArray, volumeSettings: VolumeSetting) {
+        val audioType = player.getAudioType()
+        val backend = backends[audioType]
+        if (backend == null) {
+            logger.error("No AudioBackend configured for type='{}'.", audioType)
+            player.sendMessage("Audio type $audioType is not supported.")
+            return
+        }
+        backend.playSamples(player, sampleArray, volumeSettings)
     }
 
     fun stop(player: Player) {

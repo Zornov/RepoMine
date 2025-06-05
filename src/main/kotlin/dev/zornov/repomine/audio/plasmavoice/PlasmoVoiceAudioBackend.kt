@@ -1,7 +1,7 @@
 package dev.zornov.repomine.audio.plasmavoice
 
-import dev.zornov.repomine.audio.AudioBackend
-import dev.zornov.repomine.audio.VolumeSetting
+import dev.zornov.repomine.audio.api.AudioBackend
+import dev.zornov.repomine.audio.api.VolumeSetting
 import dev.zornov.repomine.ext.WavDecoder
 import net.minestom.server.entity.Player
 import su.plo.voice.api.server.PlasmoVoiceServer
@@ -15,97 +15,89 @@ import java.util.concurrent.CopyOnWriteArrayList
 import javax.sound.sampled.AudioSystem
 
 class PlasmoVoiceAudioBackend(
-    val minestomPlasmaServer: MinestomPlasmaServer,
+    val voiceServer: PlasmoVoiceServer,
     val playerThreads: ConcurrentHashMap<Player, MutableList<Thread>>
 ) : AudioBackend {
 
-    val voiceServer: PlasmoVoiceServer by lazy { minestomPlasmaServer.server }
-
-    override fun playFile(
-        player: Player,
-        file: File,
-        volumeConfig: VolumeSetting?
-    ) {
+    override fun playFile(player: Player, file: File, volumeConfig: VolumeSetting?) {
         try {
-            val pcmSamples: ShortArray = WavDecoder.decodeWavToPcm(file)
-            val aisOriginal = AudioSystem.getAudioInputStream(file)
-            val sourceFormat = aisOriginal.format
-            val sourceChannels = sourceFormat.channels
-            aisOriginal.close()
+            val pcm = WavDecoder.decodeWavToPcm(file)
 
-            val volumeAdjusted: ShortArray = volumeConfig?.let {
-                applyVolume(pcmSamples, it)
-            } ?: pcmSamples
-
-            val monoSamples = if (sourceChannels > 1) {
-                toMono(volumeAdjusted, sourceChannels)
-            } else {
-                volumeAdjusted
+            AudioSystem.getAudioInputStream(file).use { ais ->
+                val channels = ais.format.channels
+                val adjusted = volumeConfig?.let { applyVolume(pcm, it) } ?: pcm
+                val finalSamples = if (channels > 1) toMono(adjusted, channels) else adjusted
+                sendToVoice(player, finalSamples, "PlasmoVoiceMonitor-${player.username}-${file.name}")
             }
-
-            val sourceLine: ServerSourceLine = voiceServer
-                .sourceLineManager
-                .getLineByName("proximity")
-                .orElseThrow { IllegalStateException("Source line 'proximity' not found") }
-
-            val voicePlayer: VoicePlayer = voiceServer
-                .playerManager
-                .getPlayerByName(player.username)
-                .orElseThrow { IllegalStateException("VoicePlayer for '${player.username}' not found") }
-
-            val directSource: ServerDirectSource = sourceLine.createDirectSource(voicePlayer, false)
-            val frameProvider = ArrayAudioFrameProvider(voiceServer, false)
-            frameProvider.addSamples(monoSamples)
-
-            val audioSender = directSource.createAudioSender(frameProvider)
-            audioSender.start()
-
-            audioSender.onStop {
-                frameProvider.close()
-                directSource.remove()
-            }
-
-            val monitorThread = Thread {
-                try {
-                    while (!Thread.currentThread().isInterrupted) {
-                        Thread.sleep(500)
-                    }
-                } catch (_: InterruptedException) { }
-            }.apply {
-                isDaemon = true
-                name = "PlasmoVoiceMonitor-${player.username}-${file.name}"
-            }
-            playerThreads.computeIfAbsent(player) { CopyOnWriteArrayList() }.add(monitorThread)
-            monitorThread.start()
-
         } catch (e: Exception) {
             player.sendMessage("Failed to play audio via PlasmoVoice: ${e.message}")
         }
     }
 
-    fun toMono(samples: ShortArray, channels: Int): ShortArray {
-        if (channels == 1) return samples
-        val monoLength = samples.size / channels
-        val mono = ShortArray(monoLength)
-        for (i in 0 until monoLength) {
-            var sum = 0
-            for (c in 0 until channels) {
-                sum += samples[i * channels + c].toInt()
-            }
-            mono[i] = (sum / channels).toShort()
+    override fun playSamples(player: Player, samples: ShortArray, volumeConfig: VolumeSetting?) {
+        try {
+            val adjusted = volumeConfig?.let { applyVolume(samples, it) } ?: samples
+            sendToVoice(player, adjusted, "PlasmoVoiceMonitor-Samples-${player.username}")
+        } catch (e: Exception) {
+            player.sendMessage("Failed to play samples via PlasmoVoice: ${e.message}")
         }
-        return mono
     }
 
     override fun stop(player: Player) {
         playerThreads.remove(player)?.forEach { it.interrupt() }
     }
 
-    fun applyVolume(
-        samples: ShortArray,
-        volumeConfig: VolumeSetting
-    ): ShortArray {
-        val factor = volumeConfig.volume.coerceIn(0.0, 1.0)
+    fun sendToVoice(player: Player, samples: ShortArray, threadName: String) {
+        val sourceLine: ServerSourceLine = voiceServer
+            .sourceLineManager
+            .getLineByName("proximity")
+            .orElseThrow { IllegalStateException("Source line 'proximity' not found") }
+
+        val voicePlayer: VoicePlayer = voiceServer
+            .playerManager
+            .getPlayerByName(player.username)
+            .orElseThrow { IllegalStateException("VoicePlayer for '${player.username}' not found") }
+
+        val directSource: ServerDirectSource = sourceLine.createDirectSource(voicePlayer, false)
+        val provider = ArrayAudioFrameProvider(voiceServer, false).apply {
+            addSamples(samples)
+        }
+
+        val sender = directSource.createAudioSender(provider).also { it.start() }
+        sender.onStop {
+            provider.close()
+            directSource.remove()
+        }
+
+        val monitor = Thread {
+            try { while (!Thread.currentThread().isInterrupted) Thread.sleep(500) }
+            catch (_: InterruptedException) {
+
+            }
+        }.apply {
+            isDaemon = true
+            name = threadName
+        }
+
+        playerThreads.computeIfAbsent(player) { CopyOnWriteArrayList() }.add(monitor)
+        monitor.start()
+    }
+
+    fun toMono(samples: ShortArray, channels: Int): ShortArray {
+        if (channels <= 1) return samples
+        val monoLen = samples.size / channels
+        val mono = ShortArray(monoLen)
+        for (i in 0 until monoLen) {
+            var sum = 0
+            val base = i * channels
+            for (c in 0 until channels) sum += samples[base + c].toInt()
+            mono[i] = (sum / channels).toShort()
+        }
+        return mono
+    }
+
+    fun applyVolume(samples: ShortArray, cfg: VolumeSetting): ShortArray {
+        val factor = cfg.volume.coerceIn(0.0, 1.0)
         return ShortArray(samples.size) { idx ->
             val scaled = (samples[idx] * factor).toInt()
             when {

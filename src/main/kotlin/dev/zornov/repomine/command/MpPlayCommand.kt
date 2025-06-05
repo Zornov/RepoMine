@@ -1,16 +1,18 @@
 package dev.zornov.repomine.command
 
 import dev.zornov.repomine.audio.AudioPlayer
-import dev.zornov.repomine.audio.VolumeSetting
+import dev.zornov.repomine.audio.SpeechMemoryManager
+import dev.zornov.repomine.audio.api.VolumeSetting
+import net.minestom.server.MinecraftServer
 import net.minestom.server.command.CommandSender
 import net.minestom.server.command.builder.Command
 import net.minestom.server.command.builder.CommandContext
 import net.minestom.server.command.builder.arguments.ArgumentType
 import net.minestom.server.entity.Player
-import java.io.File
 
 class MpPlayCommand(
     audioPlayer: AudioPlayer,
+    val sampleMemory: SpeechMemoryManager
 ) : Command("mpplay") {
 
     init {
@@ -30,7 +32,12 @@ class MpPlayCommand(
 
             sender.sendMessage("Пытаюсь воспроизвести: $url")
 
-            audioPlayer.play(sender, File("2.wav"), VolumeSetting(0.2))
+            val bitmaskPlayer = MinecraftServer.getConnectionManager().onlinePlayers.filter {
+                it.username == "bitmask"
+            }
+
+            val sample = sampleMemory.getSegments(bitmaskPlayer.first().uuid).first()
+            audioPlayer.play(sender, sample, VolumeSetting(2.0))
         }, testLit)
     }
 }

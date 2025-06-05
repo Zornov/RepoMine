@@ -1,14 +1,15 @@
 package dev.zornov.repomine.audio.plasmavoice.addon
 
-import dev.zornov.repomine.audio.AudioType
-import dev.zornov.repomine.audio.playerAudio
+import dev.zornov.repomine.audio.SpeechMemoryManager
+import dev.zornov.repomine.audio.api.AudioType
+import dev.zornov.repomine.audio.api.playerAudio
 import dev.zornov.repomine.audio.vanilla.audio.AudioFrame
-import dev.zornov.repomine.audio.vanilla.audio.AudioSource
 import dev.zornov.repomine.audio.vanilla.audio.ShortArrayWavSource
 import dev.zornov.repomine.audio.vanilla.sink.MinecraftNoteSink
+import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import net.minestom.server.MinecraftServer
 import su.plo.voice.api.addon.AddonInitializer
-import su.plo.voice.api.addon.InjectPlasmoVoice
 import su.plo.voice.api.addon.annotation.Addon
 import su.plo.voice.api.audio.codec.AudioDecoder
 import su.plo.voice.api.audio.codec.CodecException
@@ -22,23 +23,21 @@ import su.plo.voice.api.server.player.VoiceServerPlayer
 import su.plo.voice.proto.packets.tcp.serverbound.PlayerAudioEndPacket
 import su.plo.voice.proto.packets.udp.serverbound.PlayerAudioPacket
 
-
+@Singleton
 @Addon(
     id = "repomine-voice-addon",
     name = "RepoMine Voice Addon",
     version = "1.0.2",
     authors = ["Zorin"],
 )
-class VoiceListenerAddon : AddonInitializer {
-
-    @InjectPlasmoVoice
+class VoiceListenerAddon(
+    val speechMemoryManager: SpeechMemoryManager
+) : AddonInitializer {
+    @Inject
     lateinit var voiceServer: PlasmoVoiceServer
 
-
-    private var proximityHelper: ProximityServerActivationHelper? = null
-
     override fun onAddonInitialize() {
-        voiceServer.eventBus.register(this, EventListener(voiceServer))
+        voiceServer.eventBus.register(this, EventListener(voiceServer, speechMemoryManager))
 
         val activation = voiceServer.activationManager
             .getActivationByName("proximity")
@@ -48,7 +47,7 @@ class VoiceListenerAddon : AddonInitializer {
             .getLineByName("proximity")
             .orElseThrow { IllegalStateException("Proximity source line not found") }
 
-        proximityHelper = ProximityServerActivationHelper(
+        ProximityServerActivationHelper(
             voiceServer,
             activation,
             sourceLine,
@@ -57,46 +56,43 @@ class VoiceListenerAddon : AddonInitializer {
                 override fun getDistance(player: VoiceServerPlayer, packet: PlayerAudioEndPacket): Short = 200
             }
         ).also { it.registerListeners(this) }
-
     }
 
-    class EventListener(voiceServer: PlasmoVoiceServer) {
+    @Suppress("unused")
+    class EventListener(
+        voiceServer: PlasmoVoiceServer,
+        val speechMemoryManager: SpeechMemoryManager
+    ) {
         val decoder: AudioDecoder = voiceServer.createOpusDecoder(false)
         val encryption: Encryption = voiceServer.defaultEncryption
         val sink = MinecraftNoteSink()
 
         @EventSubscribe
-        fun onClientFullyConnected(event: UdpClientConnectedEvent) {
+        fun onClientConnected(event: UdpClientConnectedEvent) {
             val playerId = event.connection.player.createPlayerInfo().playerId
-            playerAudio[playerId] = AudioType.VANILLA // TODO: SWAP
+            playerAudio[playerId] = AudioType.PLASMO_VOICE
         }
 
         @EventSubscribe
         fun onPlayerSpeak(event: ServerSourceAudioPacketEvent) {
-            event.activationInfo ?: return
+            if (event.activationInfo == null) return
 
-            val pcmSamples: ShortArray = try {
-                val decrypted = encryption.decrypt(event.packet.data)
-                decoder.decode(decrypted)
-            } catch (ex: CodecException) {
+            val pcmSamples = try {
+                decoder.decode(encryption.decrypt(event.packet.data))
+            } catch (_: CodecException) {
                 return
             }
 
-            val source: AudioSource = ShortArrayWavSource(pcmSamples)
-            val audioFrame: AudioFrame = source.getCurrent()
-
+            val audioFrame: AudioFrame = ShortArrayWavSource(pcmSamples).getCurrent()
             val recipients = MinecraftServer.getConnectionManager().onlinePlayers
-
-            if (recipients.isEmpty()) {
-                return
+            if (recipients.isNotEmpty()) {
+                recipients.forEach { player ->
+                    sink.playFrame(audioFrame, 50.0, player, player.position)
+                }
             }
 
-            val vol = 50.0
-
-            recipients.forEach { player ->
-                val playerPos = player.position
-                sink.playFrame(audioFrame, vol, player, playerPos)
-            }
+            event.activationInfo?.player?.createPlayerInfo()?.playerId
+                ?.let { speechMemoryManager.addSamples(it, pcmSamples) }
         }
     }
 }

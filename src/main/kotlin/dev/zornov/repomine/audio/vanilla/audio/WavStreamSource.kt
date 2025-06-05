@@ -1,5 +1,6 @@
 package dev.zornov.repomine.audio.vanilla.audio
 
+import dev.zornov.repomine.audio.vanilla.api.AudioSource
 import org.quifft.QuiFFT
 import org.quifft.output.FFTFrame
 import org.quifft.output.FFTStream

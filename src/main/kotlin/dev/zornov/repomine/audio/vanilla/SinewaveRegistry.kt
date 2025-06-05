@@ -1,5 +1,6 @@
 package dev.zornov.repomine.audio.vanilla
 
+import dev.zornov.repomine.audio.api.SinWaves
 import net.minestom.server.sound.SoundEvent
 import java.util.*
 import kotlin.math.ln

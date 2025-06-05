@@ -44,7 +44,7 @@ dependencies {
     // Minestom, Voice and logging
     implementation(libs.minestom)
     runtimeOnly(libs.logback.classic)
-    implementation(libs.quifft)
+    implementation(project(":quifft"))
     compileOnly(libs.plasmovoice)
     implementation(libs.plasmovoice.minestom)
 }

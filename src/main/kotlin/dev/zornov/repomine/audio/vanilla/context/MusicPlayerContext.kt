@@ -1,8 +1,8 @@
 package dev.zornov.repomine.audio.vanilla.context
 
-import dev.zornov.repomine.audio.VolumeSetting
+import dev.zornov.repomine.audio.api.VolumeSetting
+import dev.zornov.repomine.audio.vanilla.api.AudioSource
 import dev.zornov.repomine.audio.vanilla.audio.AudioFrame
-import dev.zornov.repomine.audio.vanilla.audio.AudioSource
 import dev.zornov.repomine.audio.vanilla.sink.AudioSink
 import net.minestom.server.entity.Player
 
@@ -36,8 +36,6 @@ class MusicPlayerContext(
             sink.playFrame(frame, vol, player, pos)
         }
     }
-
-
 
     fun stop() {
         running = false

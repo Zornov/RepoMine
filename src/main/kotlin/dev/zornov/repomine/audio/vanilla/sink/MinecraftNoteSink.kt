@@ -1,6 +1,6 @@
 package dev.zornov.repomine.audio.vanilla.sink
 
-import dev.zornov.repomine.audio.vanilla.SinWaves
+import dev.zornov.repomine.audio.api.SinWaves
 import dev.zornov.repomine.audio.vanilla.SinewaveRegistry
 import dev.zornov.repomine.audio.vanilla.audio.AudioFrame
 import net.minestom.server.coordinate.Point
@@ -40,8 +40,6 @@ class MinecraftNoteSink : AudioSink {
                 mcVolume,
                 pitch
             )
-
-            println("amp=${bin.amplitude}, volumeRatio=${bin.amplitude / 32768.0}, finalVol=$mcVolume, pitch=$pitch")
 
             player.playSound(sound, position.x(), position.y(), position.z())
         }
