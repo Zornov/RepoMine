@@ -15,9 +15,16 @@ class MinecraftNoteSink : AudioSink {
         position: Point
     ) {
         val maxSounds = SinWaves.waves.size
-        val sortedBins = frame.bins
-            .sortedByDescending { it.amplitude }
+        val sortedBins = frame.bins.asSequence()
+            .sortedBy { -it.amplitude }
+            .take(frame.bins.size / 4)
+//            .filter { it.amplitude > 10 }
+            .shuffled()
+            .take(maxSounds * 2)
+            .sortedBy { -it.amplitude }
             .take(maxSounds)
+//            .take(maxSounds.coerceAtMost(8))
+            .toList()
 
         for (bin in sortedBins) {
             val event = SinewaveRegistry.getBestSound(bin.frequency)

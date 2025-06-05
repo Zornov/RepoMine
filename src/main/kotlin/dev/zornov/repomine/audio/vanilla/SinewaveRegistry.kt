@@ -9,7 +9,7 @@ object SinewaveRegistry {
     val soundToFreq = mutableMapOf<SoundEvent, Double>()
 
     init {
-        var count = 0
+        var count = 1
         for (event in SinWaves.waves) {
             register(event, SoundEvent.of("custom.sin_$count", null))
             count++
