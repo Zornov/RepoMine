@@ -5,7 +5,6 @@ import jakarta.inject.Singleton
 import net.minestom.server.entity.GameMode
 import net.minestom.server.entity.Player
 import net.minestom.server.event.player.PlayerSpawnEvent
-import net.minestom.server.timer.SchedulerManager
 
 @Singleton
 class PlayerSpawnHandler : MinestomEvent<PlayerSpawnEvent>() {
@@ -13,7 +12,8 @@ class PlayerSpawnHandler : MinestomEvent<PlayerSpawnEvent>() {
     override fun handle(event: PlayerSpawnEvent) {
         val player: Player = event.player
         player.gameMode = GameMode.CREATIVE
-        
+
+
 
     }
 }

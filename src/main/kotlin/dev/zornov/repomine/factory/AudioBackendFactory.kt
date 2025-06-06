@@ -5,15 +5,14 @@ import dev.zornov.repomine.audio.api.AudioType
 import dev.zornov.repomine.audio.plasmavoice.PlasmoVoiceAudioBackend
 import dev.zornov.repomine.audio.vanilla.VanillaAudioBackend
 import io.micronaut.context.annotation.Factory
+import jakarta.inject.Provider
 import jakarta.inject.Singleton
 import net.minestom.server.entity.Player
 import su.plo.voice.api.server.PlasmoVoiceServer
 import java.util.concurrent.ConcurrentHashMap
 
 @Factory
-class AudioBackendFactory(
-    val voiceServer: PlasmoVoiceServer
-) {
+class AudioBackendFactory {
 
     @Singleton
     fun playerThreads(): ConcurrentHashMap<Player, MutableList<Thread>> {
@@ -31,10 +30,12 @@ class AudioBackendFactory(
 
     @Singleton
     fun plasmoBackend(
-        threads: ConcurrentHashMap<Player, MutableList<Thread>>
+        threads: ConcurrentHashMap<Player, MutableList<Thread>>,
+        voiceServerProvider: Provider<PlasmoVoiceServer>
     ): PlasmoVoiceAudioBackend {
+        val server = voiceServerProvider.get()
         return PlasmoVoiceAudioBackend(
-            voiceServer = voiceServer,
+            voiceServer = server,
             playerThreads = threads
         )
     }

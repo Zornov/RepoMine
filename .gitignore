@@ -1,6 +1,6 @@
 
 /config/
-worlds
+/worlds/
 
 .idea/
 *.iml
