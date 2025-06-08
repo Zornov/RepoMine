@@ -26,7 +26,7 @@ class WorldManager(
     @PostConstruct
     fun init() {
         world = instanceManager.createInstanceContainer()
-        world.chunkLoader = AnvilLoader("./worlds")
+        world.chunkLoader = AnvilLoader("./tmp/worlds")
         world.setGenerator { it.modifier().fillHeight(0, 40, Block.GRASS_BLOCK) }
         world.setChunkSupplier(::LightingChunk)
 
