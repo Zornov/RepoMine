@@ -45,6 +45,7 @@ dependencies {
     implementation(libs.minestom)
     runtimeOnly(libs.logback.classic)
     implementation(project(":quifft"))
+    implementation("net.worldseed.multipart:WorldSeedEntityEngine:11.3.2")
     compileOnly(libs.plasmovoice)
     implementation(libs.plasmovoice.minestom)
 }

@@ -1,4 +1,4 @@
-package dev.zornov.repomine.factory
+package dev.zornov.repomine.audio
 
 import dev.zornov.repomine.audio.api.AudioBackend
 import dev.zornov.repomine.audio.api.AudioType

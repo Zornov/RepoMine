@@ -3,12 +3,14 @@ package dev.zornov.repomine.audio.vanilla.sink
 import dev.zornov.repomine.audio.api.SinWaves
 import dev.zornov.repomine.audio.vanilla.SinewaveRegistry
 import dev.zornov.repomine.audio.vanilla.audio.AudioFrame
+import jakarta.inject.Singleton
 import net.minestom.server.coordinate.Point
 import net.minestom.server.entity.Player
 import net.kyori.adventure.sound.Sound as AdventureSound
 
-class MinecraftNoteSink : AudioSink {
-    override fun playFrame(
+@Singleton
+class MinecraftNoteSink {
+    fun playFrame(
         frame: AudioFrame,
         volume: Double,
         player: Player,

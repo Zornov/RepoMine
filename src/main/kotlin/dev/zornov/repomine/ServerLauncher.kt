@@ -19,7 +19,7 @@ class ServerLauncher(
 ) {
     @PostConstruct
     fun start() {
-        minecraftServer.start("0.0.0.0", 25566)
+        minecraftServer.start("0.0.0.0", 28866) // TODO: Move to config
         commandManager.register(MpPlayCommand(audioPlayer, sampleMemory))
 //        VelocityProxy.enable("r5H9K80Rc3XE")
     }

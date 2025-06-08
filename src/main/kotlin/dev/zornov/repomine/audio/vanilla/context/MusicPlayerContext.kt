@@ -3,12 +3,12 @@ package dev.zornov.repomine.audio.vanilla.context
 import dev.zornov.repomine.audio.api.VolumeSetting
 import dev.zornov.repomine.audio.vanilla.api.AudioSource
 import dev.zornov.repomine.audio.vanilla.audio.AudioFrame
-import dev.zornov.repomine.audio.vanilla.sink.AudioSink
+import dev.zornov.repomine.audio.vanilla.sink.MinecraftNoteSink
 import net.minestom.server.entity.Player
 
 class MusicPlayerContext(
     val source: AudioSource,
-    val sink: AudioSink,
+    val sink: MinecraftNoteSink,
     val volumeSettings: VolumeSetting,
     val player: Player
 ) : Runnable {
