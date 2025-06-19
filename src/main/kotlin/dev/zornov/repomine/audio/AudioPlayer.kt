@@ -5,24 +5,21 @@ import dev.zornov.repomine.audio.api.AudioType
 import dev.zornov.repomine.audio.api.VolumeSetting
 import dev.zornov.repomine.audio.api.getAudioType
 import dev.zornov.repomine.audio.exception.UnsupportedAudioTypeException
-import dev.zornov.repomine.common.api.MinestomEvent
+import dev.zornov.repomine.common.api.EventHandler
+import dev.zornov.repomine.common.api.EventListener
 import jakarta.inject.Singleton
 import net.minestom.server.entity.Player
 import net.minestom.server.event.player.PlayerDisconnectEvent
-import org.slf4j.Logger
 import java.io.File
-import java.net.URI
-import java.nio.file.Files
-import java.nio.file.StandardCopyOption
 
 @Singleton
 class AudioPlayer(
     val backends: Map<AudioType, AudioBackend>,
-    val logger: Logger,
     val speechMemoryManager: SpeechMemoryManager
-) : MinestomEvent<PlayerDisconnectEvent>() {
+) : EventListener {
 
-    override fun handle(event: PlayerDisconnectEvent) {
+    @EventHandler
+    fun handle(event: PlayerDisconnectEvent) {
         stop(event.player)
         speechMemoryManager.clearPlayer(event.player.uuid)
     }
@@ -30,27 +27,6 @@ class AudioPlayer(
     fun play(player: Player, file: File, volumeSettings: VolumeSetting) {
         val backend = getAudioBackend(player)
         backend.playFile(player, file, volumeSettings)
-    }
-
-    fun play(player: Player, urlString: String, volumeSettings: VolumeSetting) {
-        try {
-            val uri = URI.create(urlString)
-            val url = uri.toURL()
-            val tempFile = Files
-                .createTempFile("audio_stream_", ".wav")
-                .toFile()
-                .apply { deleteOnExit() }
-
-            url.openStream().use { input ->
-                Files.copy(input, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
-            }
-            play(player, tempFile, volumeSettings)
-        } catch (e: IllegalArgumentException) {
-            player.sendMessage("Invalid URL format: ${e.message}")
-        } catch (e: Exception) {
-            logger.error("Failed to load audio from URL '{}': {}", urlString, e.message)
-            player.sendMessage("Failed to load audio from URL: ${e.message}")
-        }
     }
 
     fun play(player: Player, sampleArray: ShortArray, volumeSettings: VolumeSetting) {

@@ -6,7 +6,6 @@ import dev.zornov.repomine.audio.api.playerAudio
 import dev.zornov.repomine.audio.vanilla.audio.AudioFrame
 import dev.zornov.repomine.audio.vanilla.audio.ShortArrayWavSource
 import dev.zornov.repomine.audio.vanilla.sink.MinecraftNoteSink
-import jakarta.inject.Provider
 import jakarta.inject.Singleton
 import net.minestom.server.MinecraftServer
 import su.plo.voice.api.addon.AddonInitializer
@@ -33,13 +32,11 @@ import su.plo.voice.proto.packets.udp.serverbound.PlayerAudioPacket
 )
 class VoiceListenerAddon(
     val speechMemoryManager: SpeechMemoryManager,
-    val voiceServerProvider: Provider<MinestomVoiceServer>
-) : AddonInitializer {
     val voiceServer: MinestomVoiceServer
-        get() = voiceServerProvider.get()
+) : AddonInitializer {
 
     override fun onAddonInitialize() {
-        voiceServer.eventBus.register(this, EventListener(voiceServer, speechMemoryManager))
+        voiceServer.eventBus.register(this, VoiceListener(voiceServer, speechMemoryManager))
 
         val activation = voiceServer.activationManager
             .getActivationByName("proximity")
@@ -61,7 +58,7 @@ class VoiceListenerAddon(
     }
 
     @Suppress("unused")
-    class EventListener(
+    class VoiceListener(
         voiceServer: PlasmoVoiceServer,
         val speechMemoryManager: SpeechMemoryManager
     ) {

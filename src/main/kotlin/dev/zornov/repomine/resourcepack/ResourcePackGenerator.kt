@@ -1,5 +1,6 @@
 package dev.zornov.repomine.resourcepack
 
+import dev.zornov.repomine.ext.copyDirectory
 import io.micronaut.context.event.ApplicationEventListener
 import io.micronaut.context.event.StartupEvent
 import jakarta.inject.Singleton
@@ -10,28 +11,35 @@ import org.slf4j.Logger
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Path
-
+import kotlin.io.path.*
 
 @Singleton
 class ResourcePackGenerator(val logger: Logger) : ApplicationEventListener<StartupEvent> {
+
     override fun onApplicationEvent(event: StartupEvent) {
-        val basePath = Path.of("src/main/resources")
+        val base = Path.of("src/main/resources")
+        val tmp = Path.of("./tmp")
+        val resourcepackTmp = tmp.resolve("resourcepack")
+        val modelsTmp = tmp.resolve("models")
+        val mappingsFile = modelsTmp.resolve("model_mappings.json")
+
+        if (resourcepackTmp.exists()) resourcepackTmp.toFile().deleteRecursively()
 
         val config = PackBuilder.generate(
-            basePath.resolve("bbmodel"),
-            basePath.resolve("resourcepack"),
-            Path.of("./tmp/models")
+            base.resolve("bbmodel"),
+            resourcepackTmp,
+            modelsTmp
         )
-        logger.info("Generated pack with model mappings")
-
-        val mappingsFile = Path.of("./tmp/models/model_mappings.json")
+        Files.createDirectories(modelsTmp)
         Files.writeString(mappingsFile, config.modelMappings(), StandardCharsets.UTF_8)
-        logger.info("Wrote model mappings to ${mappingsFile.fileName}")
 
-        logger.info("Resource pack generation complete.")
+        base.resolve("resourcepack").copyDirectory(resourcepackTmp)
 
         ModelEngine.setModelMaterial(Material.MAGMA_CREAM)
-        ModelEngine.loadMappings(Files.newBufferedReader(mappingsFile), Path.of("./tmp/models"))
-    }
+        Files.newBufferedReader(mappingsFile).use { reader ->
+            ModelEngine.loadMappings(reader, modelsTmp)
+        }
 
+        logger.info("Resource pack generation complete.")
+    }
 }

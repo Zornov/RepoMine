@@ -1,6 +1,6 @@
 package dev.zornov.repomine.common.registrar
 
-import dev.zornov.repomine.common.api.MinestomEvent
+import dev.zornov.repomine.common.api.EventListener
 import io.micronaut.context.annotation.Context
 import io.micronaut.context.event.ApplicationEventListener
 import io.micronaut.context.event.StartupEvent
@@ -12,7 +12,7 @@ import kotlin.system.measureTimeMillis
 @Singleton
 @Context
 class EventRegistrar(
-    @Suppress("MnInjectionPoints") val beans: List<MinestomEvent<*>>,
+    @Suppress("MnInjectionPoints") val beans: List<EventListener>,
     val eventHandler: GlobalEventHandler,
     val logger: Logger
 ) : ApplicationEventListener<StartupEvent> {
@@ -21,8 +21,7 @@ class EventRegistrar(
         var count = 0
         val time = measureTimeMillis {
             beans.forEach {
-                it.register(eventHandler)
-                count++
+                count += it.registerAll(eventHandler)
             }
         }
         logger.info("Registered $count events in %.2f ms".format(time / 1000.0))
