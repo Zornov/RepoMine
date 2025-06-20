@@ -32,6 +32,7 @@ data class RepoItem(
             height = 0.8f
             width = 0.6f
         }
+        setBoundingBox(0.6, 0.8, 0.2)
         setTag(PARENT_TAG, this@RepoItem)
     }
 

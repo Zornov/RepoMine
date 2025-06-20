@@ -2,6 +2,7 @@ package dev.zornov.repomine.math
 
 import net.minestom.server.coordinate.Point
 import net.minestom.server.instance.Instance
+import net.minestom.server.instance.block.Block
 
 object RayTrace {
 
@@ -10,7 +11,7 @@ object RayTrace {
         start: Point,
         end: Point,
         step: Double = 0.1,
-        predicate: (block: net.minestom.server.instance.block.Block) -> Boolean = { !it.isAir }
+        predicate: (block: Block) -> Boolean = { !it.isAir }
     ): Boolean {
         val direction = end.sub(start)
         val distance = start.distance(end)

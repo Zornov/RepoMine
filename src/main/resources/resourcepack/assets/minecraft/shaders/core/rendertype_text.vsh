@@ -14,14 +14,19 @@ out float vertexDistance;
 out vec4 vertexColor;
 out vec2 texCoord0;
 
+const vec2 TOP_COLOR = vec2(78.0 / 255.0, 90.0 / 255.0);
+const vec2 BOTTOM_COLOR = vec2(79.0 / 255.0, 90.0 / 255.0);
+
 void main() {
     vec3 pos = Position;
     vec4 color = Color;
-    float alpha255 = Color.a * 255.0;
+    vec2 rg = Color.rg;
 
-    // Main Color
-    if (Color.r == 78.0/255.0 && Color.g == 90.0/255.0) {
+    if (rg == TOP_COLOR) {
         pos.y += Color.b * 255.0;
+        color = vec4(1.0);
+    } else if (rg == BOTTOM_COLOR) {
+        pos.y -= Color.b * 255.0;
         color = vec4(1.0);
     }
 
