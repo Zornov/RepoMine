@@ -2,8 +2,8 @@ package dev.zornov.repomine.input.pickup
 
 import dev.zornov.repomine.common.api.EventHandler
 import dev.zornov.repomine.common.api.EventListener
-import dev.zornov.repomine.repo.RepoItem
 import dev.zornov.repomine.player.RepoPlayer
+import dev.zornov.repomine.repo.RepoItem
 import jakarta.inject.Singleton
 import net.minestom.server.event.player.PlayerEntityInteractEvent
 
@@ -19,6 +19,7 @@ class PlayerInteractHandler : EventListener {
             player.currentItem?.setNoGravity(false)
             player.currentItem = null
         } else {
+            if (parent.isHolding) return
             player.currentItem = parent
             parent.setNoGravity(true)
         }

@@ -17,15 +17,23 @@ import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.sin
 
-class RepoPlayer(connection: PlayerConnection, profile: GameProfile) : Player(connection, profile) {
+class RepoPlayer(
+    connection: PlayerConnection,
+    profile: GameProfile
+) : Player(connection, profile) {
 
     var currentItem: RepoItem? = null
+        set(value) {
+            field?.isHolding = false
+            field = value?.apply { isHolding = true }
+        }
+
     lateinit var scene: RepoScene
 
     override fun spawn() {
         super.spawn()
-        // TODO: Test section, only for test
         RepoItem(Material.DIAMOND, 100.0).spawnAt(instance, Pos(1.0, 41.0, 2.0))
+
         scene = RepoScene(instance, SaleZoneConfig(
             start = Pos(12.0, 41.0, 1.0),
             end = Pos(10.0, 40.0, -1.0),
@@ -36,38 +44,36 @@ class RepoPlayer(connection: PlayerConnection, profile: GameProfile) : Player(co
 
     override fun update(time: Long) {
         super.update(time)
-        scene.update()
+        if (::scene.isInitialized) scene.update()
 
         currentItem?.takeIf { it.isAlive }?.let {
             moveItemTowardLook(it)
-            showPrice(it)
-        } ?: run {
-            getLineOfSightEntity(5.0) { it.entityType == EntityType.INTERACTION }
-                ?.getTag(PARENT_TAG)
-                ?.let { sendActionBar(Component.text(it.price).bottomPadding(80)) }
-                ?: sendActionBar(Component.empty())
-        }
+            sendActionBar(Component.text(it.price).bottomPadding(80))
+        } ?: showHoveredEntityPrice()
     }
 
-    fun showPrice(item: RepoItem) {
-        sendActionBar(Component.text(item.price).bottomPadding(80))
+    private fun showHoveredEntityPrice() {
+        val price = getLineOfSightEntity(5.0) { it.entityType == EntityType.INTERACTION }
+            ?.getTag(PARENT_TAG)?.price
+            ?.let { Component.text(it).bottomPadding(80) }
+
+        sendActionBar(price ?: Component.empty())
     }
 
-    fun moveItemTowardLook(item: RepoItem) {
-        val eyePos = position.add(0.0, eyeHeight, 0.0)
-        val (yaw, pitch) = Math.toRadians(position.yaw.toDouble()) to Math.toRadians(position.pitch.toDouble())
-
-        val direction = Vec(
-            -sin(yaw) * cos(pitch),
-            -sin(pitch),
-            cos(yaw) * cos(pitch)
+    private fun moveItemTowardLook(item: RepoItem) {
+        val eye = position.add(0.0, eyeHeight, 0.0)
+        val (yaw, pitch) = position.yaw.toDouble() to position.pitch.toDouble()
+        val dir = Vec(
+            -sin(Math.toRadians(yaw)) * cos(Math.toRadians(pitch)),
+            -sin(Math.toRadians(pitch)),
+            cos(Math.toRadians(yaw)) * cos(Math.toRadians(pitch))
         ).normalize().mul(1.5)
 
-        val target = eyePos.add(direction)
-        val adjustedY = max(target.y - 0.4, position.y)
+        val target = eye.add(dir)
+        val y = max(target.y - 0.4, position.y)
 
-        if (instance.getBlock(target.withY(adjustedY)).isAir) {
-            item.moveTo(target.withY(adjustedY).withYaw(0f).withPitch(0f))
+        if (instance.getBlock(target.withY(y)).isAir) {
+            item.moveTo(target.withY(y).withYaw(0f).withPitch(0f))
         }
     }
 }

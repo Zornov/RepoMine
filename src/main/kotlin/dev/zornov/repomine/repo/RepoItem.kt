@@ -12,31 +12,25 @@ import net.minestom.server.entity.metadata.other.InteractionMeta
 import net.minestom.server.instance.Instance
 import net.minestom.server.item.ItemStack
 import net.minestom.server.item.Material
-import java.util.concurrent.CompletableFuture
 
-data class RepoItem(
-    val material: Material,
-    val initialPrice: Double
-) {
+data class RepoItem(val material: Material, val initialPrice: Double) {
     var price = initialPrice
-
     var isAlive = true
         private set
-
+    var isHolding = false
     var lastPosition: Pos? = null
         private set
 
-    val entity = ItemEntity(material, this)
+    val entity = ItemEntity()
     val proxy = Entity(EntityType.INTERACTION).apply {
         meta<InteractionMeta> {
-            height = 0.8f
-            width = 0.6f
+            height = 0.8f; width = 0.6f
         }
         setBoundingBox(0.6, 0.8, 0.2)
         setTag(PARENT_TAG, this@RepoItem)
     }
 
-    inner class ItemEntity(material: Material, val parent: RepoItem) : Entity(EntityType.ITEM_DISPLAY) {
+    inner class ItemEntity : Entity(EntityType.ITEM_DISPLAY) {
         init {
             meta<ItemDisplayMeta> {
                 posRotInterpolationDuration = 2
@@ -45,13 +39,11 @@ data class RepoItem(
             }
         }
 
-        override fun teleport(position: Pos): CompletableFuture<Void> {
-            val prevPos = lastPosition
-            lastPosition = position
-            return super.teleport(position).thenRunAsync {
-                if (prevPos != null && RayTrace.hasObstruction(instance, prevPos, position)) {
-                    parent.decreasePrice()
-                }
+        override fun teleport(pos: Pos) = super.teleport(pos).also {
+            val prev = lastPosition
+            lastPosition = pos
+            it.thenRunAsync {
+                if (prev != null && RayTrace.hasObstruction(instance, prev, pos)) decreasePrice()
             }
         }
     }
@@ -59,21 +51,19 @@ data class RepoItem(
     fun decreasePrice() {
         if (!isAlive) return
         price -= initialPrice * 0.05
-        if (price <= 0) {
-            despawn()
-        }
+        if (price <= 0) despawn()
     }
 
-    fun spawnAt(instance: Instance, position: Pos) {
+    fun spawnAt(inst: Instance, pos: Pos) {
         isAlive = true
-        entity.setInstance(instance, position)
-        proxy.setInstance(instance, position)
-        lastPosition = position
+        entity.setInstance(inst, pos)
+        proxy.setInstance(inst, pos)
+        lastPosition = pos
     }
 
-    fun moveTo(position: Pos) {
-        entity.teleport(position)
-        proxy.teleport(position)
+    fun moveTo(pos: Pos) {
+        entity.teleport(pos)
+        proxy.teleport(pos)
     }
 
     fun despawn() {

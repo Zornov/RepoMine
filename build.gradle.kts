@@ -1,8 +1,5 @@
-import io.micronaut.gradle.docker.tasks.BuildLayersTask
-
 plugins {
     alias(libs.plugins.kotlin)
-    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.kapt)
     alias(libs.plugins.micronaut.application)
     alias(libs.plugins.shadow)
@@ -31,33 +28,22 @@ repositories {
 }
 
 dependencies {
-    // Micronaut core
+    // Micronaut Core
     implementation(libs.micronaut.inject)
     implementation(libs.micronaut.runtime)
     kapt(libs.micronaut.inject.java)
 
-    // Kotlin
-    implementation(libs.kotlinx.coroutines.core)
-    implementation(libs.kotlinx.serialization.core)
-    implementation(libs.kotlinx.serialization.json)
-
-    // Minestom, Voice and logging
+    // Game-related
     implementation(libs.minestom)
+    implementation(libs.worldseed)
+
+    // Logging
     runtimeOnly(libs.logback.classic)
+
+    // Voicechat
     implementation(project(":quifft"))
-    implementation("net.worldseed.multipart:WorldSeedEntityEngine:11.3.2")
     compileOnly(libs.plasmovoice)
     implementation(libs.plasmovoice.minestom)
-}
-
-tasks.withType<BuildLayersTask> {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-}
-tasks.withType<Tar> {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-}
-tasks.withType<Zip> {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 tasks.build {

@@ -11,7 +11,8 @@ import org.slf4j.Logger
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Path
-import kotlin.io.path.*
+import kotlin.io.path.deleteExisting
+import kotlin.io.path.exists
 
 @Singleton
 class ResourcePackGenerator(val logger: Logger) : ApplicationEventListener<StartupEvent> {
