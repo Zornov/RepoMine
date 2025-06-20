@@ -23,7 +23,8 @@ class ResourcePackGenerator(val logger: Logger) : ApplicationEventListener<Start
         val modelsTmp = tmp.resolve("models")
         val mappingsFile = modelsTmp.resolve("model_mappings.json")
 
-        if (resourcepackTmp.exists()) resourcepackTmp.toFile().deleteRecursively()
+        listOf(resourcepackTmp, modelsTmp).forEach { if (it.exists()) it.toFile().deleteRecursively() }
+        if (mappingsFile.exists()) mappingsFile.deleteExisting()
 
         val config = PackBuilder.generate(
             base.resolve("bbmodel"),

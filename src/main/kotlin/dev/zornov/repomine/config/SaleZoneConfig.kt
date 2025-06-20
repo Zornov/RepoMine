@@ -1,10 +1,11 @@
 package dev.zornov.repomine.config
 
 import net.minestom.server.coordinate.Point
+import net.minestom.server.coordinate.Vec
 
 data class SaleZoneConfig(
-    val from: Point,
-    val to: Point,
+    val start: Point,
+    val end: Point,
     val labelPosition: Point,
-    val labelRotation: Triple<Double, Double, Double>
+    val labelRotation: Vec
 )

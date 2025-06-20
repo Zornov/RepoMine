@@ -18,12 +18,12 @@ class SaleZone(
     minCorner: Point,
     maxCorner: Point,
     val labelPosition: Point,
-    val labelRotation: Triple<Double, Double, Double>
+    val labelRotation: Vec
 ) {
     constructor(instance: Instance, config: SaleZoneConfig) : this(
         instance,
-        config.from,
-        config.to,
+        config.start,
+        config.end,
         config.labelPosition,
         config.labelRotation
     )
@@ -36,7 +36,7 @@ class SaleZone(
         maxCorner.x(), maxCorner.y(), maxCorner.z()
     )
 
-    val priceDisplay = Entity(EntityType.TEXT_DISPLAY).apply {
+        val priceDisplay = Entity(EntityType.TEXT_DISPLAY).apply {
         setNoGravity(true)
         meta<TextDisplayMeta> {
             text = Component.text("0.0")
@@ -46,7 +46,9 @@ class SaleZone(
         }
     }
 
-    fun spawn() = priceDisplay.setInstance(instance, labelPosition)
+    fun spawn() {
+        priceDisplay.setInstance(instance, labelPosition)
+    }
 
     fun update() {
         val price = regionCollider.getEntityIn(instance)

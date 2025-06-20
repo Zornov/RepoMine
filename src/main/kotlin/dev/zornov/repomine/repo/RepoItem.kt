@@ -19,12 +19,12 @@ data class RepoItem(
     val initialPrice: Double
 ) {
     var price = initialPrice
-        private set
 
     var isAlive = true
         private set
 
-    private var lastPosition: Pos? = null
+    var lastPosition: Pos? = null
+        private set
 
     val entity = ItemEntity(material, this)
     val proxy = Entity(EntityType.INTERACTION).apply {
