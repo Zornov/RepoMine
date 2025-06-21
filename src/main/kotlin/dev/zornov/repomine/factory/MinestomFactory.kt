@@ -1,4 +1,3 @@
-
 package dev.zornov.repomine.factory
 
 import io.micronaut.context.annotation.Context
@@ -9,9 +8,9 @@ import net.minestom.server.command.CommandManager
 import net.minestom.server.event.GlobalEventHandler
 import net.minestom.server.instance.InstanceManager
 import net.minestom.server.network.ConnectionManager
+import net.minestom.server.scoreboard.TeamManager
 import net.minestom.server.timer.SchedulerManager
 
-@Suppress("unused")
 @Factory
 class MinestomFactory {
 
@@ -40,4 +39,8 @@ class MinestomFactory {
     @Singleton
     fun scheduler(minecraftServer: MinecraftServer): SchedulerManager =
         MinecraftServer.getSchedulerManager()
+
+    @Singleton
+    fun teamManager(minecraftServer: MinecraftServer): TeamManager =
+        MinecraftServer.getTeamManager()
 }

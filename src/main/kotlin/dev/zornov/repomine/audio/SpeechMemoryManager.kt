@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentLinkedDeque
 @Singleton
 class SpeechMemoryManager {
     companion object {
-        const val MAX_SEGMENTS_PER_PLAYER = 1
+        const val MAX_SEGMENTS_PER_PLAYER = 5
         const val RECORD_TIME = 5
         const val SAMPLES_PER_RECORD = RECORD_TIME * 48_000
     }
@@ -47,6 +47,13 @@ class SpeechMemoryManager {
         val deque = completedSegments[playerId] ?: return emptyList()
         synchronized(deque) {
             return ArrayList(deque)
+        }
+    }
+
+    fun getRandomSegment(playerId: UUID): ShortArray? {
+        val deque = completedSegments[playerId] ?: return null
+        synchronized(deque) {
+            return if (deque.isEmpty()) null else deque.random()
         }
     }
 

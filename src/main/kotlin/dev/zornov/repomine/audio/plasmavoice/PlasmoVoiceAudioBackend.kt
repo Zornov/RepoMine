@@ -71,9 +71,7 @@ class PlasmoVoiceAudioBackend(
 
         val monitor = Thread {
             try { while (!Thread.currentThread().isInterrupted) Thread.sleep(500) }
-            catch (_: InterruptedException) {
-
-            }
+            catch (_: InterruptedException) { /* Thread interrupted, exit */ }
         }.apply {
             isDaemon = true
             name = threadName

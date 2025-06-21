@@ -15,7 +15,10 @@ import kotlin.io.path.deleteExisting
 import kotlin.io.path.exists
 
 @Singleton
-class ResourcePackGenerator(val logger: Logger) : ApplicationEventListener<StartupEvent> {
+class ResourcePackGenerator(
+    val logger: Logger,
+    val server: ResourcePackService
+) : ApplicationEventListener<StartupEvent> {
 
     override fun onApplicationEvent(event: StartupEvent) {
         val base = Path.of("src/main/resources")
@@ -43,5 +46,7 @@ class ResourcePackGenerator(val logger: Logger) : ApplicationEventListener<Start
         }
 
         logger.info("Resource pack generation complete.")
+
+        server.onServerStart()
     }
 }

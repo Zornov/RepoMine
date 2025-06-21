@@ -25,10 +25,10 @@ import su.plo.voice.proto.packets.udp.serverbound.PlayerAudioPacket
 
 @Singleton
 @Addon(
-    id = "repomine-voice-addon",
+    id = "voice-addon",
     name = "RepoMine Voice Addon",
-    version = "1.0.2",
-    authors = ["Zorin"],
+    version = "1.0.0",
+    authors = ["Zorin"]
 )
 class VoiceListenerAddon(
     val speechMemoryManager: SpeechMemoryManager,

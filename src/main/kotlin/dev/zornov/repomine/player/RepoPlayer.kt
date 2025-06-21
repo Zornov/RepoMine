@@ -1,6 +1,8 @@
 package dev.zornov.repomine.player
 
 import dev.zornov.repomine.config.SaleZoneConfig
+import dev.zornov.repomine.entity.NO_COLLISION_TEAM
+import dev.zornov.repomine.entity.player.RepoPlayerMob
 import dev.zornov.repomine.ext.bottomPadding
 import dev.zornov.repomine.input.pickup.PARENT_TAG
 import dev.zornov.repomine.repo.RepoItem
@@ -25,13 +27,20 @@ class RepoPlayer(
     var currentItem: RepoItem? = null
         set(value) {
             field?.isHolding = false
-            field = value?.apply { isHolding = true }
+            field = value?.also { it.isHolding = true }
         }
 
+    lateinit var entity: RepoPlayerMob
+        private set
+
     lateinit var scene: RepoScene
+        private set
 
     override fun spawn() {
         super.spawn()
+        isAutoViewable = false
+        team = NO_COLLISION_TEAM
+
         RepoItem(Material.DIAMOND, 100.0).spawnAt(instance, Pos(1.0, 41.0, 2.0))
 
         scene = RepoScene(instance, SaleZoneConfig(
@@ -40,19 +49,25 @@ class RepoPlayer(
             labelPosition = Pos(12.2, 41.5, 0.5),
             labelRotation = Vec(-90.0, -20.0, 0.0)
         )).apply { create() }
+
+        entity = RepoPlayerMob(this)
     }
 
     override fun update(time: Long) {
         super.update(time)
         if (::scene.isInitialized) scene.update()
 
-        currentItem?.takeIf { it.isAlive }?.let {
-            moveItemTowardLook(it)
-            sendActionBar(Component.text(it.price).bottomPadding(80))
-        } ?: showHoveredEntityPrice()
+        currentItem
+            ?.takeIf { it.isAlive }
+            ?.let {
+                moveItemTowardLook(it)
+                sendActionBar(Component.text(it.price).bottomPadding(80))
+            } ?: showHoveredEntityPrice()
+
+        entity.teleport(position.withPitch(0f))
     }
 
-    private fun showHoveredEntityPrice() {
+    fun showHoveredEntityPrice() {
         val price = getLineOfSightEntity(5.0) { it.entityType == EntityType.INTERACTION }
             ?.getTag(PARENT_TAG)?.price
             ?.let { Component.text(it).bottomPadding(80) }
@@ -60,13 +75,15 @@ class RepoPlayer(
         sendActionBar(price ?: Component.empty())
     }
 
-    private fun moveItemTowardLook(item: RepoItem) {
+    fun moveItemTowardLook(item: RepoItem) {
         val eye = position.add(0.0, eyeHeight, 0.0)
-        val (yaw, pitch) = position.yaw.toDouble() to position.pitch.toDouble()
+        val yawRad = Math.toRadians(position.yaw.toDouble())
+        val pitchRad = Math.toRadians(position.pitch.toDouble())
+
         val dir = Vec(
-            -sin(Math.toRadians(yaw)) * cos(Math.toRadians(pitch)),
-            -sin(Math.toRadians(pitch)),
-            cos(Math.toRadians(yaw)) * cos(Math.toRadians(pitch))
+            -sin(yawRad) * cos(pitchRad),
+            -sin(pitchRad),
+            cos(yawRad) * cos(pitchRad)
         ).normalize().mul(1.5)
 
         val target = eye.add(dir)
@@ -75,5 +92,10 @@ class RepoPlayer(
         if (instance.getBlock(target.withY(y)).isAir) {
             item.moveTo(target.withY(y).withYaw(0f).withPitch(0f))
         }
+    }
+
+    override fun remove() {
+        super.remove()
+        entity.remove()
     }
 }
