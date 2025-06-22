@@ -25,6 +25,7 @@ repositories {
     maven("https://jitpack.io")
     maven("https://repo.plasmoverse.com/releases")
     maven("https://repo.plasmoverse.com/snapshots")
+    maven("https://reposilite.atlasengine.ca/public")
 }
 
 dependencies {

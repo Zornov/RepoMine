@@ -9,7 +9,7 @@ import net.minestom.server.timer.TaskSchedule
 import net.worldseed.multipart.animations.AnimationHandlerImpl
 import kotlin.random.Random
 
-class RepoPlayerMob(player: Player) : EntityCreature(EntityType.ZOMBIE) {
+class RepoPlayerEntity(player: Player) : EntityCreature(EntityType.PUFFERFISH) {
     val model = RepoPlayerModel().also {
         it.init(player.instance, player.position)
     }
@@ -27,7 +27,7 @@ class RepoPlayerMob(player: Player) : EntityCreature(EntityType.ZOMBIE) {
     fun playBlinkingAnimation() {
         val delay = Random.nextLong(5, 16)
         MinecraftServer.getSchedulerManager().buildTask {
-            animationHandler.takeIf { it.repeating == null }?.playOnce("eye_blink") {
+            animationHandler.takeIf { it.repeating != "mouth_speak" }?.playOnce("eye_blink") {
                 playBlinkingAnimation()
             } ?: playBlinkingAnimation()
         }.delay(TaskSchedule.seconds(delay)).schedule()

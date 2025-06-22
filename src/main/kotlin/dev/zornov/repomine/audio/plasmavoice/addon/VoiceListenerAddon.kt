@@ -43,7 +43,8 @@ class VoiceListenerAddon(
         }
 
         ProximityServerActivationHelper(voiceServer, activation, sourceLine, object : ProximityServerActivationHelper.DistanceSupplier {
-            private val distance = 200.toShort()
+            val distance = 200.toShort()
+
             override fun getDistance(player: VoiceServerPlayer, packet: PlayerAudioPacket) = distance
             override fun getDistance(player: VoiceServerPlayer, packet: PlayerAudioEndPacket) = distance
         }).registerListeners(this)
