@@ -18,7 +18,7 @@ import net.minestom.server.network.player.PlayerConnection
 import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.sin
-
+    
 class RepoPlayer(
     connection: PlayerConnection,
     profile: GameProfile

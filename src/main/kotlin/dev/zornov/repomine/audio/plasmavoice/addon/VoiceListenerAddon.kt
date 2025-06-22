@@ -6,16 +6,17 @@ import dev.zornov.repomine.audio.api.playerAudio
 import dev.zornov.repomine.audio.vanilla.audio.AudioFrame
 import dev.zornov.repomine.audio.vanilla.audio.ShortArrayWavSource
 import dev.zornov.repomine.audio.vanilla.sink.MinecraftNoteSink
+import dev.zornov.repomine.player.RepoPlayer
 import jakarta.inject.Singleton
 import net.minestom.server.MinecraftServer
 import su.plo.voice.api.addon.AddonInitializer
 import su.plo.voice.api.addon.annotation.Addon
-import su.plo.voice.api.audio.codec.AudioDecoder
 import su.plo.voice.api.audio.codec.CodecException
 import su.plo.voice.api.encryption.Encryption
 import su.plo.voice.api.event.EventSubscribe
-import su.plo.voice.api.server.PlasmoVoiceServer
 import su.plo.voice.api.server.audio.capture.ProximityServerActivationHelper
+import su.plo.voice.api.server.event.audio.source.PlayerSpeakEndEvent
+import su.plo.voice.api.server.event.audio.source.PlayerSpeakEvent
 import su.plo.voice.api.server.event.audio.source.ServerSourceAudioPacketEvent
 import su.plo.voice.api.server.event.connection.UdpClientConnectedEvent
 import su.plo.voice.api.server.player.VoiceServerPlayer
@@ -24,57 +25,41 @@ import su.plo.voice.proto.packets.tcp.serverbound.PlayerAudioEndPacket
 import su.plo.voice.proto.packets.udp.serverbound.PlayerAudioPacket
 
 @Singleton
-@Addon(
-    id = "voice-addon",
-    name = "RepoMine Voice Addon",
-    version = "1.0.0",
-    authors = ["Zorin"]
-)
+@Addon(id = "voice-addon", name = "RepoMine Voice Addon", version = "1.0.0", authors = ["Zorin"])
 class VoiceListenerAddon(
     val speechMemoryManager: SpeechMemoryManager,
     val voiceServer: MinestomVoiceServer
 ) : AddonInitializer {
 
     override fun onAddonInitialize() {
-        voiceServer.eventBus.register(this, VoiceListener(voiceServer, speechMemoryManager))
+        voiceServer.eventBus.register(this, VoiceListener())
 
-        val activation = voiceServer.activationManager
-            .getActivationByName("proximity")
-            .orElseThrow { IllegalStateException("Proximity activation not found") }
+        val activation = voiceServer.activationManager.getActivationByName("proximity")
+            .orElseThrow { error("Proximity activation not found") }
+        val sourceLine = voiceServer.sourceLineManager.getLineByName("proximity")
+            .orElseThrow { error("Proximity source line not found") }
 
-        val sourceLine = voiceServer.sourceLineManager
-            .getLineByName("proximity")
-            .orElseThrow { IllegalStateException("Proximity source line not found") }
-
-        ProximityServerActivationHelper(
-            voiceServer,
-            activation,
-            sourceLine,
-            object : ProximityServerActivationHelper.DistanceSupplier {
-                override fun getDistance(player: VoiceServerPlayer, packet: PlayerAudioPacket): Short = 200
-                override fun getDistance(player: VoiceServerPlayer, packet: PlayerAudioEndPacket): Short = 200
-            }
-        ).also { it.registerListeners(this) }
+        ProximityServerActivationHelper(voiceServer, activation, sourceLine, object : ProximityServerActivationHelper.DistanceSupplier {
+            val distance = 200.toShort()
+            override fun getDistance(player: VoiceServerPlayer, packet: PlayerAudioPacket) = distance
+            override fun getDistance(player: VoiceServerPlayer, packet: PlayerAudioEndPacket) = distance
+        }).registerListeners(this)
     }
 
-    @Suppress("unused")
-    class VoiceListener(
-        voiceServer: PlasmoVoiceServer,
-        val speechMemoryManager: SpeechMemoryManager
-    ) {
-        val decoder: AudioDecoder = voiceServer.createOpusDecoder(false)
+    inner class VoiceListener {
+        val decoder = voiceServer.createOpusDecoder(false)
         val encryption: Encryption = voiceServer.defaultEncryption
         val sink = MinecraftNoteSink()
 
         @EventSubscribe
         fun onClientConnected(event: UdpClientConnectedEvent) {
-            val playerId = event.connection.player.createPlayerInfo().playerId
-            playerAudio[playerId] = AudioType.PLASMO_VOICE
+            playerAudio[event.connection.player.createPlayerInfo().playerId] = AudioType.PLASMO_VOICE
         }
 
         @EventSubscribe
         fun onPlayerSpeak(event: ServerSourceAudioPacketEvent) {
-            if (event.activationInfo == null) return
+            val activationInfo = event.activationInfo ?: return
+            event.result = ServerSourceAudioPacketEvent.Result.HANDLED
 
             val pcmSamples = try {
                 decoder.decode(encryption.decrypt(event.packet.data))
@@ -83,15 +68,27 @@ class VoiceListenerAddon(
             }
 
             val audioFrame: AudioFrame = ShortArrayWavSource(pcmSamples).getCurrent()
-            val recipients = MinecraftServer.getConnectionManager().onlinePlayers
-            if (recipients.isNotEmpty()) {
-                recipients.forEach { player ->
-                    sink.playFrame(audioFrame, 50.0, player, player.position)
-                }
+            MinecraftServer.getConnectionManager().onlinePlayers.forEach { player ->
+                sink.playFrame(audioFrame, 50.0, player, player.position)
             }
 
-            event.activationInfo?.player?.createPlayerInfo()?.playerId
-                ?.let { speechMemoryManager.addSamples(it, pcmSamples) }
+            val playerId = activationInfo.player.instance.uuid
+            speechMemoryManager.addSamples(playerId, pcmSamples)
         }
+
+        @EventSubscribe(ignoreCancelled = false)
+        fun onPlayerAudioStart(event: PlayerSpeakEvent) {
+            println("test")
+            getRepoPlayer(event.player.instance.uuid)?.entity?.animationHandler?.playRepeat("mouth_speak")
+        }
+
+        @EventSubscribe
+        fun onPlayerAudioEnd(event: PlayerSpeakEndEvent) {
+            getRepoPlayer(event.player.instance.uuid)?.entity?.animationHandler?.stopRepeat("mouth_speak")
+        }
+
+        fun getRepoPlayer(uuid: java.util.UUID): RepoPlayer? =
+            MinecraftServer.getConnectionManager().onlinePlayers
+                .find { it.uuid == uuid } as? RepoPlayer
     }
 }

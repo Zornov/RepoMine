@@ -16,7 +16,7 @@ class RepoPlayerMob(player: Player) : EntityCreature(EntityType.ZOMBIE) {
         setInstance(player.instance, player.position).join()
         isInvisible = true
         team = NO_COLLISION_TEAM
-        model.removeViewer(player)
+//        model.removeViewer(player)
     }
 
     override fun tick(time: Long) {
