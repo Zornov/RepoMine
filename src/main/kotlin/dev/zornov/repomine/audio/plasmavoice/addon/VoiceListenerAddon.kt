@@ -1,6 +1,5 @@
 package dev.zornov.repomine.audio.plasmavoice.addon
 
-import dev.zornov.repomine.audio.SpeechMemoryManager
 import dev.zornov.repomine.audio.api.AudioType
 import dev.zornov.repomine.audio.api.getAudioType
 import dev.zornov.repomine.audio.api.playerAudio
@@ -28,7 +27,6 @@ import java.util.*
 @Singleton
 @Addon(id = "voice-addon", name = "RepoMine Voice Addon", version = "1.0.0", authors = ["Zorin"])
 class VoiceListenerAddon(
-    val speechMemoryManager: SpeechMemoryManager,
     val voiceServer: MinestomVoiceServer
 ) : AddonInitializer {
 
@@ -38,7 +36,7 @@ class VoiceListenerAddon(
         val sourceLine = voiceServer.sourceLineManager.getLineByName("proximity")
             .orElseThrow { error("Proximity source line not found") }
 
-        voiceServer.eventBus.register(this, VoiceListener())
+        voiceServer.eventBus.register(this, RepoVoiceListener())
 
         activation.onPlayerActivationStart {
             getRepoPlayer(it.instance.uuid)?.entity?.animationHandler?.playRepeat("mouth_speak")
@@ -51,9 +49,8 @@ class VoiceListenerAddon(
         }).registerListeners(this)
     }
 
-
     @Suppress("unused")
-    inner class VoiceListener {
+    inner class RepoVoiceListener {
         val decoder = voiceServer.createOpusDecoder(false)
         val encryption: Encryption = voiceServer.defaultEncryption
         val sink = MinecraftNoteSink()
@@ -76,6 +73,7 @@ class VoiceListenerAddon(
                 .filter { it.getAudioType() != AudioType.PLASMO_VOICE }
                 .forEach { sink.playFrame(audioFrame, 50.0, it, it.position) }
 
+            // TODO: Put in async
             // speechMemoryManager.addSamples(event.player.instance.uuid, pcmSamples)
         }
 

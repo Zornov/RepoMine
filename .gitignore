@@ -2,6 +2,8 @@
 /config/
 /tmp/
 
+/src/main/resources/bbmodel
+
 .idea/
 *.iml
 .gradle/
@@ -14,3 +16,4 @@ kotlin-js-store/
 *.war
 *.class
 *.log
+/src/main/resources/bbmodel/
