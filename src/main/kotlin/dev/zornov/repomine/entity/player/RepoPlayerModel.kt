@@ -8,7 +8,7 @@ class RepoPlayerModel : GenericModelImpl() {
     override fun getId() = "player.bbmodel"
 
     override fun setPosition(pos: Pos?) {
-        super.setPosition(pos?.add(0.0, 0.4, 0.0))
+        super.setPosition(pos?.add(0.0, 0.01, 0.0))
     }
 
     override fun init(instance: Instance?, position: Pos) {
