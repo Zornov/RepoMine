@@ -51,13 +51,13 @@ class ApexPredatorHuntGoal(
 
     fun performAttack(target: LivingEntity) {
         attacking = true
+        entity.model.viewers.forEach {
+            it.playSound(EntitySoundList.Monster.ApexPredator.ATTACK, entity.position)
+        }
         animationHandler.playOnce("transform_attack") {
             lastAttack = System.currentTimeMillis()
             target.damage(EntityDamage(entity, 1.5f))
             attacking = false
-            entity.model.viewers.forEach {
-                it.playSound(EntitySoundList.Monster.ApexPredator.ATTACK, entity.position)
-            }
         }
     }
 
