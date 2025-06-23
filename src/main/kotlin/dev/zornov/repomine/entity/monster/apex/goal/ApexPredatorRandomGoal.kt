@@ -19,20 +19,12 @@ class ApexPredatorRandomGoal(
     var lastSoundTime = 0L
     val soundInterval = 750L
 
-    fun getNearbyOffsets(radius: Int) = buildList {
-        for (x in -radius..radius)
-            for (y in -2..2)
-                for (z in -radius..radius)
-                    if (x != 0 || y != 0 || z != 0)
-                        add(Vec(x.toDouble(), y.toDouble(), z.toDouble()))
-    }
-
     override fun shouldStart() =
         System.currentTimeMillis() - lastWalkTime >= walkCooldown &&
                 animationHandler.playing == "idle" && !entity.isAngry
 
     override fun start() {
-        val offsets = getNearbyOffsets(20)
+        val offsets = nearbyOffsets()
         repeat(offsets.size) {
             val offset = offsets[random.nextInt(offsets.size)]
             if (entity.navigator.setPathTo(entity.position.add(offset))) {
@@ -45,12 +37,14 @@ class ApexPredatorRandomGoal(
     override fun tick(time: Long) {
         val now = System.currentTimeMillis()
         if (animationHandler.playing == "walk" && now - lastSoundTime >= soundInterval) {
-            entity.instance.playSound(EntitySoundList.Monster.ApexPredator.WALK, entity.position.x, entity.position.y, entity.position.z)
+            entity.model.viewers.forEach {
+                it.playSound(EntitySoundList.Monster.ApexPredator.WALK, entity.position)
+            }
             lastSoundTime = now
         }
     }
 
-    override fun shouldEnd(): Boolean =
+    override fun shouldEnd() =
         isCloseEnough(entity.position, entity.navigator.pathPosition, 2.5)
 
     override fun end() {
@@ -63,5 +57,16 @@ class ApexPredatorRandomGoal(
         val dy = pos1.y() - pos2.y()
         val dz = pos1.z() - pos2.z()
         return dx * dx + dy * dy + dz * dz < threshold * threshold
+    }
+
+    fun nearbyOffsets(): List<Vec> {
+        val radius = 20
+        return buildList {
+            for (x in -radius..radius)
+                for (y in -2..2)
+                    for (z in -radius..radius)
+                        if (x != 0 || y != 0 || z != 0)
+                            add(Vec(x.toDouble(), y.toDouble(), z.toDouble()))
+        }
     }
 }

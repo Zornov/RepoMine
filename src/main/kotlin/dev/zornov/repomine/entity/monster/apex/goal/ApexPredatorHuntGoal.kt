@@ -10,21 +10,21 @@ import net.minestom.server.entity.damage.EntityDamage
 import net.worldseed.multipart.animations.AnimationHandlerImpl
 
 class ApexPredatorHuntGoal(
-    val entity: ApexPredatorEntity,
-    val animationHandler: AnimationHandlerImpl
+    private val entity: ApexPredatorEntity,
+    private val animationHandler: AnimationHandlerImpl
 ) : GoalSelector(entity) {
-    var lastTargetPos = Pos.ZERO!!
-    var lastAttack = 0L
-    var attacking = false
+    private var lastTargetPos = Pos.ZERO
+    private var lastAttack = 0L
+    private var attacking = false
 
-    val attackRange = 2.5
-    val attackCooldown = 2000L
+    private val attackRange = 2.5
+    private val attackCooldown = 2000L
 
     override fun shouldStart() = entity.isAngry
 
     override fun start() {
-        entity.target = findTarget()
-        entity.target?.let {
+        findTarget()?.also {
+            entity.target = it
             entity.navigator.setPathTo(it.position)
             animationHandler.playRepeat("transform_walk")
         }
@@ -33,8 +33,8 @@ class ApexPredatorHuntGoal(
     override fun tick(time: Long) {
         if (!entity.isAngry) return
 
-        entity.target = findTarget() ?: return resetState()
-        val target = entity.target!!
+        val target = findTarget() ?: return resetState().also { entity.target = null }
+        entity.target = target
 
         if (!target.position.samePoint(lastTargetPos)) {
             lastTargetPos = target.position
@@ -45,15 +45,18 @@ class ApexPredatorHuntGoal(
         if (entity.position.distance(target.position) <= attackRange &&
             !attacking && now - lastAttack >= attackCooldown
         ) {
-            attacking = true
-            animationHandler.playOnce("transform_attack") {
-                lastAttack = System.currentTimeMillis()
-                if (target is LivingEntity) target.damage(EntityDamage(entity, 1.5f))
-                attacking = false
-                entity.instance.playSound(
-                    EntitySoundList.Monster.ApexPredator.ATTACK,
-                    entity.position.x, entity.position.y, entity.position.z
-                )
+            (target as? LivingEntity)?.let { performAttack(it) }
+        }
+    }
+
+    fun performAttack(target: LivingEntity) {
+        attacking = true
+        animationHandler.playOnce("transform_attack") {
+            lastAttack = System.currentTimeMillis()
+            target.damage(EntityDamage(entity, 1.5f))
+            attacking = false
+            entity.model.viewers.forEach {
+                it.playSound(EntitySoundList.Monster.ApexPredator.ATTACK, entity.position)
             }
         }
     }
