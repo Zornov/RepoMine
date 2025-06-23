@@ -1,6 +1,10 @@
 package dev.zornov.repomine.entity.monster.apex
 
 import dev.zornov.repomine.entity.NO_COLLISION_TEAM
+import dev.zornov.repomine.entity.monster.apex.goal.ApexPredatorHuntGoal
+import dev.zornov.repomine.entity.monster.apex.goal.ApexPredatorRandomGoal
+import dev.zornov.repomine.entity.monster.apex.target.ApexPredatorTargetSelector
+import net.minestom.server.MinecraftServer
 import net.minestom.server.coordinate.Pos
 import net.minestom.server.entity.EntityCreature
 import net.minestom.server.entity.EntityType
@@ -9,23 +13,25 @@ import net.minestom.server.entity.attribute.Attribute
 import net.minestom.server.instance.Instance
 import net.worldseed.multipart.animations.AnimationHandlerImpl
 import net.worldseed.multipart.events.ModelInteractEvent
+import java.time.Duration
 
 class ApexPredatorEntity(inst: Instance, pos: Pos) : EntityCreature(EntityType.ZOMBIE) {
-    private val model = ApexPredatorModel().apply { init(inst, pos) }
-    private val animationHandler = AnimationHandlerImpl(model)
+    val model = ApexPredatorModel().apply { init(inst, pos) }
+    val animationHandler = AnimationHandlerImpl(model)
     var isAngry = false
 
     init {
         isInvisible = true
         team = NO_COLLISION_TEAM
-
         getAttribute(Attribute.MOVEMENT_SPEED).baseValue = 0.05
+        getAttribute(Attribute.ATTACK_DAMAGE).baseValue = 0.0
 
         addAIGroup(
             listOf(
                 ApexPredatorHuntGoal(this, animationHandler),
+                ApexPredatorRandomGoal(this, animationHandler)
             ),
-            listOf()
+            listOf(ApexPredatorTargetSelector(this))
         )
 
         model.eventNode().addListener(ModelInteractEvent::class.java) {
@@ -34,13 +40,18 @@ class ApexPredatorEntity(inst: Instance, pos: Pos) : EntityCreature(EntityType.Z
                 animationHandler.playOnce("transform") {
                     isAngry = true
                     animationHandler.playRepeat("transform_idle")
-                    getAttribute(Attribute.MOVEMENT_SPEED).baseValue = 0.25
+                    getAttribute(Attribute.MOVEMENT_SPEED).baseValue = 0.4
+                    MinecraftServer.getSchedulerManager().buildTask {
+                        isAngry = false
+                        animationHandler.stopRepeat("transform_idle")
+                        animationHandler.playRepeat("idle")
+                        getAttribute(Attribute.MOVEMENT_SPEED).baseValue = 0.05
+                    }.delay(Duration.ofSeconds(15)).schedule()
                 }
             }
         }
 
         animationHandler.playRepeat("idle")
-
         setInstance(inst, pos).join()
     }
 

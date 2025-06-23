@@ -16,7 +16,7 @@ class PlayerSpawnHandler(
     @EventHandler
     fun handle(event: PlayerSpawnEvent) {
         val player: Player = event.player
-        player.gameMode = GameMode.CREATIVE
+        player.gameMode = GameMode.SURVIVAL
         player.sendResourcePacks(rpServer.request)
 
     }
