@@ -2,8 +2,8 @@ package dev.zornov.repomine.input.pickup
 
 import dev.zornov.repomine.common.api.EventHandler
 import dev.zornov.repomine.common.api.EventListener
+import dev.zornov.repomine.item.RepoItem
 import dev.zornov.repomine.player.RepoPlayer
-import dev.zornov.repomine.repo.RepoItem
 import jakarta.inject.Singleton
 import net.minestom.server.event.player.PlayerEntityInteractEvent
 

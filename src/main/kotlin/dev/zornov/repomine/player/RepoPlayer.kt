@@ -1,13 +1,10 @@
 package dev.zornov.repomine.player
 
-import dev.zornov.repomine.config.SaleZoneConfig
 import dev.zornov.repomine.entity.NO_COLLISION_TEAM
-import dev.zornov.repomine.entity.monster.apex.ApexPredatorEntity
 import dev.zornov.repomine.entity.player.RepoPlayerEntity
 import dev.zornov.repomine.ext.bottomPadding
 import dev.zornov.repomine.input.pickup.PARENT_TAG
-import dev.zornov.repomine.repo.RepoItem
-import dev.zornov.repomine.scene.RepoScene
+import dev.zornov.repomine.item.RepoItem
 import net.kyori.adventure.text.Component
 import net.minestom.server.coordinate.Pos
 import net.minestom.server.coordinate.Vec
@@ -34,32 +31,18 @@ class RepoPlayer(
     lateinit var entity: RepoPlayerEntity
         private set
 
-    lateinit var scene: RepoScene
-        private set
-
     override fun spawn() {
         super.spawn()
         isAutoViewable = false
         team = NO_COLLISION_TEAM
 
         RepoItem(Material.DIAMOND, 100.0).spawnAt(instance, Pos(1.0, 41.0, 2.0))
-        scene = RepoScene(instance, SaleZoneConfig(
-            start = Pos(12.0, 41.0, 1.0),
-            end = Pos(10.0, 40.0, -1.0),
-            labelPosition = Pos(12.2, 41.5, 0.5),
-            labelRotation = Vec(-90.0, -20.0, 0.0)
-        )).apply { create() }
 
         entity = RepoPlayerEntity(this)
-        ApexPredatorEntity(
-            instance, Pos(1.0, 40.0, 2.0)
-        ).model.addViewer(this)
     }
 
     override fun update(time: Long) {
         super.update(time)
-        if (::scene.isInitialized) scene.update()
-
         currentItem
             ?.takeIf { it.isAlive }
             ?.let {

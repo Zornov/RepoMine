@@ -15,6 +15,7 @@ class ApexPredatorTargetSelector(
             .asSequence()
             .filter {
                 !it.isDead &&
+                it.isOnline &&
                 !it.isInvisible &&
                 it.position.distance(entity.position) <= 10
             }

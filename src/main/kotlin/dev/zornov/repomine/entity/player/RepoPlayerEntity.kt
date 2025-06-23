@@ -1,20 +1,17 @@
 package dev.zornov.repomine.entity.player
 
 import dev.zornov.repomine.entity.NO_COLLISION_TEAM
+import dev.zornov.repomine.entity.RepoEntity
 import net.minestom.server.MinecraftServer
-import net.minestom.server.entity.EntityCreature
 import net.minestom.server.entity.EntityType
 import net.minestom.server.entity.Player
 import net.minestom.server.timer.TaskSchedule
-import net.worldseed.multipart.animations.AnimationHandlerImpl
 import kotlin.random.Random
 
-class RepoPlayerEntity(player: Player) : EntityCreature(EntityType.PUFFERFISH) {
-    val model = RepoPlayerModel().also {
+class RepoPlayerEntity(player: Player) : RepoEntity(EntityType.PUFFERFISH) {
+    override val model = RepoPlayerModel().also {
         it.init(player.instance, player.position)
     }
-
-    val animationHandler = AnimationHandlerImpl(model)
 
     init {
         setInstance(player.instance, player.position).join()

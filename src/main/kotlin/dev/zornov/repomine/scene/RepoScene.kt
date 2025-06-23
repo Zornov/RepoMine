@@ -1,23 +1,32 @@
 package dev.zornov.repomine.scene
 
-import dev.zornov.repomine.config.SaleZoneConfig
+import dev.zornov.repomine.entity.RepoEntity
 import dev.zornov.repomine.player.RepoPlayer
-import dev.zornov.repomine.repo.SaleZone
-import net.minestom.server.instance.Instance
 
-class RepoScene(
-    instance: Instance,
-    saleZoneConfig: SaleZoneConfig
-) {
-    val players: MutableList<RepoPlayer> = mutableListOf()
+class RepoScene {
+    private val players = mutableListOf<RepoPlayer>()
+    private val monsters = mutableListOf<RepoEntity>()
 
-    val saleZone = SaleZone(instance, saleZoneConfig)
-
-    fun create() {
-        saleZone.spawn()
+    fun addPlayer(player: RepoPlayer) {
+        players.forEach { p ->
+            player.entity.show(p)
+            p.entity.show(player)
+            monsters.forEach { it.show(player) }
+        }
+        players.add(player)
     }
 
-    fun update() {
-        saleZone.update()
+    fun removePlayer(player: RepoPlayer) {
+        players.remove(player)
+        players.forEach { p ->
+            p.entity.hide(player)
+            player.entity.hide(p)
+            monsters.forEach { it.hide(player) }
+        }
+    }
+
+    fun addMonster(monster: RepoEntity) {
+        monsters.add(monster)
+        players.forEach { monster.show(it) }
     }
 }

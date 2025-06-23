@@ -1,4 +1,4 @@
-package dev.zornov.repomine.repo
+package dev.zornov.repomine.item
 
 import dev.zornov.repomine.ext.meta
 import dev.zornov.repomine.input.pickup.PARENT_TAG

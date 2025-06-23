@@ -2,23 +2,21 @@ package dev.zornov.repomine.entity.monster.apex
 
 import dev.zornov.repomine.entity.EntitySoundList
 import dev.zornov.repomine.entity.NO_COLLISION_TEAM
+import dev.zornov.repomine.entity.RepoEntity
 import dev.zornov.repomine.entity.monster.apex.goal.ApexPredatorHuntGoal
 import dev.zornov.repomine.entity.monster.apex.goal.ApexPredatorRandomGoal
 import dev.zornov.repomine.entity.monster.apex.target.ApexPredatorTargetSelector
 import net.minestom.server.MinecraftServer
 import net.minestom.server.coordinate.Pos
-import net.minestom.server.entity.EntityCreature
 import net.minestom.server.entity.EntityType
 import net.minestom.server.entity.attribute.Attribute
 import net.minestom.server.instance.Instance
-import net.worldseed.multipart.animations.AnimationHandlerImpl
 import net.worldseed.multipart.events.ModelDamageEvent
 import net.worldseed.multipart.events.ModelInteractEvent
 import java.time.Duration
 
-class ApexPredatorEntity(inst: Instance, pos: Pos) : EntityCreature(EntityType.PUFFERFISH) {
-    val model = ApexPredatorModel().apply { init(inst, pos) }
-    val animationHandler = AnimationHandlerImpl(model)
+class ApexPredatorEntity(inst: Instance, pos: Pos) : RepoEntity(EntityType.PUFFERFISH) {
+    override val model = ApexPredatorModel().apply { init(inst, pos) }
     var isAngry = false
 
     init {
@@ -50,7 +48,7 @@ class ApexPredatorEntity(inst: Instance, pos: Pos) : EntityCreature(EntityType.P
                         animationHandler.stopRepeat("transform_idle")
                         animationHandler.playRepeat("idle")
                         getAttribute(Attribute.MOVEMENT_SPEED).baseValue = 0.05
-                    }.delay(Duration.ofSeconds(15)).schedule()
+                    }.delay(Duration.ofSeconds(20)).schedule()
                 }
             }
         }
@@ -63,6 +61,7 @@ class ApexPredatorEntity(inst: Instance, pos: Pos) : EntityCreature(EntityType.P
         animationHandler.playRepeat("idle")
         setInstance(inst, pos).join()
     }
+
 
     override fun tick(time: Long) {
         super.tick(time)
