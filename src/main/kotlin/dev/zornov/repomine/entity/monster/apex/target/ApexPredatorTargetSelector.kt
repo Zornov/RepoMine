@@ -20,7 +20,7 @@ class ApexPredatorTargetSelector(
                         !it.isDead &&
                         !it.isInvisible &&
                         it.entityType == EntityType.PLAYER &&
-                        it.position.distance(entity.position) <= 20
+                        it.position.distance(entity.position) <= 10
             }
             .minByOrNull { it.position.distance(entity.position) }
     }

@@ -1,5 +1,6 @@
 package dev.zornov.repomine.entity.monster.apex
 
+import dev.zornov.repomine.entity.EntitySoundList
 import dev.zornov.repomine.entity.NO_COLLISION_TEAM
 import dev.zornov.repomine.entity.monster.apex.goal.ApexPredatorHuntGoal
 import dev.zornov.repomine.entity.monster.apex.goal.ApexPredatorRandomGoal
@@ -12,10 +13,11 @@ import net.minestom.server.entity.Player
 import net.minestom.server.entity.attribute.Attribute
 import net.minestom.server.instance.Instance
 import net.worldseed.multipart.animations.AnimationHandlerImpl
+import net.worldseed.multipart.events.ModelDamageEvent
 import net.worldseed.multipart.events.ModelInteractEvent
 import java.time.Duration
 
-class ApexPredatorEntity(inst: Instance, pos: Pos) : EntityCreature(EntityType.ZOMBIE) {
+class ApexPredatorEntity(inst: Instance, pos: Pos) : EntityCreature(EntityType.PUFFERFISH) {
     val model = ApexPredatorModel().apply { init(inst, pos) }
     val animationHandler = AnimationHandlerImpl(model)
     var isAngry = false
@@ -24,7 +26,6 @@ class ApexPredatorEntity(inst: Instance, pos: Pos) : EntityCreature(EntityType.Z
         isInvisible = true
         team = NO_COLLISION_TEAM
         getAttribute(Attribute.MOVEMENT_SPEED).baseValue = 0.05
-        getAttribute(Attribute.ATTACK_DAMAGE).baseValue = 0.0
 
         addAIGroup(
             listOf(
@@ -34,13 +35,17 @@ class ApexPredatorEntity(inst: Instance, pos: Pos) : EntityCreature(EntityType.Z
             listOf(ApexPredatorTargetSelector(this))
         )
 
-        model.eventNode().addListener(ModelInteractEvent::class.java) {
+        fun triggerAngry() {
             if (!isAngry) {
                 animationHandler.stopRepeat("idle")
                 animationHandler.playOnce("transform") {
                     isAngry = true
                     animationHandler.playRepeat("transform_idle")
                     getAttribute(Attribute.MOVEMENT_SPEED).baseValue = 0.4
+                    instance.playSound(
+                        EntitySoundList.Monster.ApexPredator.ATTACK,
+                        position.x, position.y, position.z
+                    )
                     MinecraftServer.getSchedulerManager().buildTask {
                         isAngry = false
                         animationHandler.stopRepeat("transform_idle")
@@ -49,6 +54,11 @@ class ApexPredatorEntity(inst: Instance, pos: Pos) : EntityCreature(EntityType.Z
                     }.delay(Duration.ofSeconds(15)).schedule()
                 }
             }
+        }
+
+        model.eventNode().apply {
+            addListener(ModelInteractEvent::class.java) { triggerAngry() }
+            addListener(ModelDamageEvent::class.java) { triggerAngry() }
         }
 
         animationHandler.playRepeat("idle")
