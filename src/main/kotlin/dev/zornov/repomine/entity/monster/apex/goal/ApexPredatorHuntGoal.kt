@@ -5,6 +5,7 @@ import dev.zornov.repomine.entity.monster.apex.ApexPredatorEntity
 import net.minestom.server.coordinate.Pos
 import net.minestom.server.entity.LivingEntity
 import net.minestom.server.entity.ai.GoalSelector
+import net.minestom.server.entity.attribute.Attribute
 import net.minestom.server.entity.damage.EntityDamage
 import net.worldseed.multipart.animations.AnimationHandlerImpl
 
@@ -66,6 +67,7 @@ class ApexPredatorHuntGoal(
 
     fun resetState() {
         entity.isAngry = false
+        entity.getAttribute(Attribute.MOVEMENT_SPEED).baseValue = 0.05
         animationHandler.stopRepeat("transform_idle")
         animationHandler.playRepeat("idle")
     }

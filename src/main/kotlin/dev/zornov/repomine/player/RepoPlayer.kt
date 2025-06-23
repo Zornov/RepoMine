@@ -53,7 +53,7 @@ class RepoPlayer(
         entity = RepoPlayerEntity(this)
         ApexPredatorEntity(
             instance, Pos(1.0, 40.0, 2.0)
-        )
+        ).model.addViewer(this)
     }
 
     override fun update(time: Long) {
