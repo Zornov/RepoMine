@@ -1,8 +1,7 @@
 package dev.zornov.repomine
 
 import io.micronaut.context.annotation.Context
-import io.micronaut.context.event.ApplicationEventListener
-import io.micronaut.runtime.server.event.ServerStartupEvent
+import jakarta.annotation.PostConstruct
 import jakarta.inject.Singleton
 import net.minestom.server.MinecraftServer
 
@@ -10,9 +9,10 @@ import net.minestom.server.MinecraftServer
 @Context
 class ServerLauncher(
     val minecraftServer: MinecraftServer
-) : ApplicationEventListener<ServerStartupEvent> {
-
-    override fun onApplicationEvent(event: ServerStartupEvent?) {
-        minecraftServer.start("0.0.0.0", 25565)
+) {
+    @PostConstruct
+    fun start() {
+        minecraftServer.start("0.0.0.0", 25565) // TODO: Move to config
+//        VelocityProxy.enable("r5H9K80Rc3XE")
     }
 }
