@@ -6,6 +6,7 @@ import dev.zornov.repomine.ext.bottomPadding
 import dev.zornov.repomine.input.pickup.PARENT_TAG
 import dev.zornov.repomine.item.RepoItem
 import net.kyori.adventure.text.Component
+import net.minestom.server.MinecraftServer
 import net.minestom.server.coordinate.Pos
 import net.minestom.server.coordinate.Vec
 import net.minestom.server.entity.EntityType
@@ -13,6 +14,7 @@ import net.minestom.server.entity.Player
 import net.minestom.server.item.Material
 import net.minestom.server.network.player.GameProfile
 import net.minestom.server.network.player.PlayerConnection
+import java.time.Duration
 import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.sin
@@ -39,6 +41,14 @@ class RepoPlayer(
         RepoItem(Material.DIAMOND, 100.0).spawnAt(instance, Pos(1.0, 41.0, 2.0))
 
         entity = RepoPlayerEntity(this)
+
+        // TODO: Test section
+        val ent = RepoPlayerEntity(this)
+        ent.model.addViewer(this)
+        ent.animationHandler.playRepeat("mouth_speak")
+        MinecraftServer.getSchedulerManager().buildTask {
+            ent.animationHandler.stopRepeat("mouth_speak")
+        }.delay(Duration.ofSeconds(20)).schedule()
     }
 
     override fun update(time: Long) {

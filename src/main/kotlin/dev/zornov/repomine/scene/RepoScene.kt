@@ -29,4 +29,9 @@ class RepoScene {
         monsters.add(monster)
         players.forEach { monster.show(it) }
     }
+
+    fun removeMonster(monster: RepoEntity) {
+        monsters.remove(monster)
+        players.forEach { monster.hide(it) }
+    }
 }
