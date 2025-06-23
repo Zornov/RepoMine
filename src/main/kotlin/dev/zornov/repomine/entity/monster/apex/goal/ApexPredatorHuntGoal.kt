@@ -10,15 +10,15 @@ import net.minestom.server.entity.damage.EntityDamage
 import net.worldseed.multipart.animations.AnimationHandlerImpl
 
 class ApexPredatorHuntGoal(
-    private val entity: ApexPredatorEntity,
-    private val animationHandler: AnimationHandlerImpl
+    val entity: ApexPredatorEntity,
+    val animationHandler: AnimationHandlerImpl
 ) : GoalSelector(entity) {
-    private var lastTargetPos = Pos.ZERO
-    private var lastAttack = 0L
-    private var attacking = false
+    var lastTargetPos = Pos.ZERO
+    var lastAttack = 0L
+    var attacking = false
 
-    private val attackRange = 2.5
-    private val attackCooldown = 2000L
+    val attackRange = 2.5
+    val attackCooldown = 2000L
 
     override fun shouldStart() = entity.isAngry
 
