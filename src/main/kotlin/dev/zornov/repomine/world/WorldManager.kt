@@ -2,7 +2,8 @@ package dev.zornov.repomine.world
 
 import dev.zornov.repomine.common.api.EventHandler
 import dev.zornov.repomine.common.api.EventListener
-import jakarta.annotation.PostConstruct
+import io.micronaut.context.event.ApplicationEventListener
+import io.micronaut.runtime.server.event.ServerStartupEvent
 import jakarta.annotation.PreDestroy
 import jakarta.inject.Singleton
 import net.minestom.server.coordinate.Pos
@@ -19,13 +20,12 @@ import net.minestom.server.utils.time.TimeUnit
 class WorldManager(
     val instanceManager: InstanceManager,
     val scheduler: SchedulerManager
-) : EventListener {
+) : EventListener, ApplicationEventListener<ServerStartupEvent> {
 
     lateinit var world: InstanceContainer
         private set
 
-    @PostConstruct
-    fun init() {
+    override fun onApplicationEvent(event: ServerStartupEvent?) {
         world = instanceManager.createInstanceContainer()
         world.chunkLoader = AnvilLoader("./tmp/worlds")
         world.setGenerator { it.modifier().fillHeight(0, 40, Block.GRASS_BLOCK) }
@@ -53,4 +53,5 @@ class WorldManager(
     fun shutdown() {
         world.saveChunksToStorage()
     }
+
 }
