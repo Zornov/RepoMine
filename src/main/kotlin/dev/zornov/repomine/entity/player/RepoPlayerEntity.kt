@@ -20,7 +20,6 @@ class RepoPlayerEntity(player: Player) : EntityCreature(EntityType.PUFFERFISH) {
         setInstance(player.instance, player.position).join()
         isInvisible = true
         team = NO_COLLISION_TEAM
-        model.removeViewer(player)
         playBlinkingAnimation()
     }
 
@@ -37,17 +36,6 @@ class RepoPlayerEntity(player: Player) : EntityCreature(EntityType.PUFFERFISH) {
         super.tick(time)
         model.position = position
         model.setGlobalRotation(position.yaw.toDouble(), position.pitch.toDouble())
-    }
-
-    override fun updateNewViewer(player: Player) {
-        super.updateNewViewer(player)
-        model.addViewer(player)
-    }
-
-    @Suppress("UnstableApiUsage")
-    override fun updateOldViewer(player: Player) {
-        super.updateOldViewer(player)
-        model.removeViewer(player)
     }
 
     override fun remove() {

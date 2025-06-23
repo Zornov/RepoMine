@@ -9,7 +9,6 @@ import net.minestom.server.MinecraftServer
 import net.minestom.server.coordinate.Pos
 import net.minestom.server.entity.EntityCreature
 import net.minestom.server.entity.EntityType
-import net.minestom.server.entity.Player
 import net.minestom.server.entity.attribute.Attribute
 import net.minestom.server.instance.Instance
 import net.worldseed.multipart.animations.AnimationHandlerImpl
@@ -71,17 +70,6 @@ class ApexPredatorEntity(inst: Instance, pos: Pos) : EntityCreature(EntityType.P
             model.position = position
             model.setGlobalRotation(position.yaw.toDouble(), position.pitch.toDouble())
         }
-    }
-
-    override fun updateNewViewer(player: Player) {
-        super.updateNewViewer(player)
-        model.addViewer(player)
-    }
-
-    @Suppress("UnstableApiUsage")
-    override fun updateOldViewer(player: Player) {
-        super.updateOldViewer(player)
-        model.removeViewer(player)
     }
 
     override fun remove() {
