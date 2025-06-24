@@ -13,7 +13,7 @@ import net.minestom.server.instance.Instance
 import net.minestom.server.item.ItemStack
 import net.minestom.server.item.Material
 
-data class RepoItem(val material: Material, val initialPrice: Double) {
+data class RepoItem(val material: Material, val initialPrice: Int) {
     var price = initialPrice
     var isAlive = true
         private set
@@ -50,7 +50,7 @@ data class RepoItem(val material: Material, val initialPrice: Double) {
 
     fun decreasePrice() {
         if (!isAlive) return
-        price -= initialPrice * 0.05
+        price -= (initialPrice * 0.05).toInt()
         if (price <= 0) despawn()
     }
 

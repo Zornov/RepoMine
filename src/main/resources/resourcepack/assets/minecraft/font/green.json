@@ -1,0 +1,74 @@
+{
+  "providers": [
+    {
+      "type": "bitmap",
+      "file": "font/green/digit_0.png",
+      "ascent": -20,
+      "height": 6,
+      "chars": ["0"]
+    },
+    {
+      "type": "bitmap",
+      "file": "font/green/digit_1.png",
+      "ascent": -20,
+      "height": 6,
+      "chars": ["1"]
+    },
+    {
+      "type": "bitmap",
+      "file": "font/green/digit_2.png",
+      "ascent": -20,
+      "height": 6,
+      "chars": ["2"]
+    },
+    {
+      "type": "bitmap",
+      "file": "font/green/digit_3.png",
+      "ascent": -20,
+      "height": 6,
+      "chars": ["3"]
+    },
+    {
+      "type": "bitmap",
+      "file": "font/green/digit_4.png",
+      "ascent": -20,
+      "height": 6,
+      "chars": ["4"]
+    },
+    {
+      "type": "bitmap",
+      "file": "font/green/digit_5.png",
+      "ascent": -20,
+      "height": 6,
+      "chars": ["5"]
+    },
+    {
+      "type": "bitmap",
+      "file": "font/green/digit_6.png",
+      "ascent": -20,
+      "height": 6,
+      "chars": ["6"]
+    },
+    {
+      "type": "bitmap",
+      "file": "font/green/digit_7.png",
+      "ascent": -20,
+      "height": 6,
+      "chars": ["7"]
+    },
+    {
+      "type": "bitmap",
+      "file": "font/green/digit_8.png",
+      "ascent": -20,
+      "height": 6,
+      "chars": ["8"]
+    },
+    {
+      "type": "bitmap",
+      "file": "font/green/digit_9.png",
+      "ascent": -20,
+      "height": 6,
+      "chars": ["9"]
+    }
+  ]
+}
