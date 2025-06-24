@@ -3,6 +3,7 @@ package dev.zornov.repomine.player
 import dev.zornov.repomine.entity.NO_COLLISION_TEAM
 import dev.zornov.repomine.entity.player.RepoPlayerEntity
 import dev.zornov.repomine.ext.bottomPadding
+import dev.zornov.repomine.ext.toKey
 import dev.zornov.repomine.input.pickup.PARENT_TAG
 import dev.zornov.repomine.item.RepoItem
 import net.kyori.adventure.text.Component
@@ -36,7 +37,7 @@ class RepoPlayer(
         isAutoViewable = false
         team = NO_COLLISION_TEAM
 
-        RepoItem(Material.DIAMOND, 100.0).spawnAt(instance, Pos(1.0, 41.0, 2.0))
+        RepoItem(Material.DIAMOND, 100).spawnAt(instance, Pos(1.0, 41.0, 2.0))
 
         entity = RepoPlayerEntity(this)
     }
@@ -47,7 +48,7 @@ class RepoPlayer(
             ?.takeIf { it.isAlive }
             ?.let {
                 moveItemTowardLook(it)
-                sendActionBar(Component.text(it.price).bottomPadding(80))
+                sendActionBar(Component.text(it.price).font("green".toKey()).bottomPadding(80))
             } ?: showHoveredEntityPrice()
 
         entity.teleport(position.withPitch(0f))
@@ -56,7 +57,7 @@ class RepoPlayer(
     fun showHoveredEntityPrice() {
         val price = getLineOfSightEntity(5.0) { it.entityType == EntityType.INTERACTION }
             ?.getTag(PARENT_TAG)?.price
-            ?.let { Component.text(it).bottomPadding(80) }
+            ?.let { Component.text(it).font("green".toKey()).bottomPadding(80) }
 
         sendActionBar(price ?: Component.empty())
     }
