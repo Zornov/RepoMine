@@ -1,4 +1,4 @@
-package dev.zornov.repomine.audio.plasmavoice
+package dev.zornov.repomine.audio.plasmovoice
 
 import dev.zornov.repomine.audio.api.AudioBackend
 import dev.zornov.repomine.audio.api.VolumeSetting

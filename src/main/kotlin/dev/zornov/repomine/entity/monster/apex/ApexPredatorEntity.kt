@@ -21,6 +21,7 @@ class ApexPredatorEntity(inst: Instance, pos: Pos) : RepoEntity(EntityType.PUFFE
 
     init {
         isInvisible = true
+        isInvulnerable = true
         team = NO_COLLISION_TEAM
         getAttribute(Attribute.MOVEMENT_SPEED).baseValue = 0.05
 
