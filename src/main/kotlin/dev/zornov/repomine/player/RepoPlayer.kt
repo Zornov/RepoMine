@@ -3,7 +3,9 @@ package dev.zornov.repomine.player
 import dev.zornov.repomine.entity.NO_COLLISION_TEAM
 import dev.zornov.repomine.entity.player.RepoPlayerEntity
 import dev.zornov.repomine.ext.bottomPadding
+import dev.zornov.repomine.ext.horizontalPadding
 import dev.zornov.repomine.ext.toKey
+import dev.zornov.repomine.ext.withPerCharHorizontalPadding
 import dev.zornov.repomine.input.pickup.PARENT_TAG
 import dev.zornov.repomine.item.RepoItem
 import net.kyori.adventure.text.Component
@@ -26,7 +28,7 @@ class RepoPlayer(
     var currentItem: RepoItem? = null
         set(value) {
             field?.isHolding = false
-            field = value?.also { it.isHolding = true }
+            field = value?.apply { isHolding = true }
         }
 
     lateinit var entity: RepoPlayerEntity
@@ -36,29 +38,50 @@ class RepoPlayer(
         super.spawn()
         isAutoViewable = false
         team = NO_COLLISION_TEAM
-
         RepoItem(Material.DIAMOND, 100).spawnAt(instance, Pos(1.0, 41.0, 2.0))
-
         entity = RepoPlayerEntity(this)
     }
 
     override fun update(time: Long) {
         super.update(time)
-        currentItem
-            ?.takeIf { it.isAlive }
-            ?.let {
-                moveItemTowardLook(it)
-                sendActionBar(Component.text(it.price).font("green".toKey()).bottomPadding(80))
-            } ?: showHoveredEntityPrice()
-
+        currentItem?.takeIf { it.isAlive }?.let { item ->
+            moveItemTowardLook(item)
+            val priceComponent = Component.text(item.price).font("green".toKey())
+                .bottomPadding(80)
+                .withPerCharHorizontalPadding(-1)
+                .append(
+                    Component.text("$").font("green".toKey())
+                        .bottomPadding(80)
+                        .horizontalPadding(2)
+                )
+            val decreasedComponent = if (item.lastDecreased > 0)
+                Component.text("${item.lastDecreased}").font("red".toKey())
+                    .bottomPadding(70)
+                    .horizontalPadding(-18)
+                    .append(
+                        Component.text("$").font("red".toKey())
+                            .bottomPadding(70)
+                            .horizontalPadding(2)
+                    )
+            else Component.empty()
+            sendActionBar(priceComponent.append(decreasedComponent))
+        } ?: showHoveredEntityPrice()
         entity.teleport(position.withPitch(0f))
     }
 
     fun showHoveredEntityPrice() {
         val price = getLineOfSightEntity(5.0) { it.entityType == EntityType.INTERACTION }
             ?.getTag(PARENT_TAG)?.price
-            ?.let { Component.text(it).font("green".toKey()).bottomPadding(80) }
-
+            ?.let {
+                Component.text(it).font("green".toKey())
+                    .bottomPadding(80)
+                    .withPerCharHorizontalPadding(-1)
+                    .append(
+                        Component.text("$").font("green".toKey())
+                            .bottomPadding(80)
+                            .horizontalPadding(2)
+                    )
+            }
         sendActionBar(price ?: Component.empty())
     }
 
@@ -66,16 +89,13 @@ class RepoPlayer(
         val eye = position.add(0.0, eyeHeight, 0.0)
         val yawRad = Math.toRadians(position.yaw.toDouble())
         val pitchRad = Math.toRadians(position.pitch.toDouble())
-
         val dir = Vec(
             -sin(yawRad) * cos(pitchRad),
             -sin(pitchRad),
             cos(yawRad) * cos(pitchRad)
         ).normalize().mul(1.5)
-
         val target = eye.add(dir)
         val y = max(target.y - 0.4, position.y)
-
         if (instance.getBlock(target.withY(y)).isAir) {
             item.moveTo(target.withY(y).withYaw(0f).withPitch(0f))
         }

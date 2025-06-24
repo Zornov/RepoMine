@@ -3,6 +3,7 @@ package dev.zornov.repomine.item
 import dev.zornov.repomine.ext.meta
 import dev.zornov.repomine.input.pickup.PARENT_TAG
 import dev.zornov.repomine.math.RayTrace
+import net.minestom.server.MinecraftServer
 import net.minestom.server.coordinate.Pos
 import net.minestom.server.coordinate.Vec
 import net.minestom.server.entity.Entity
@@ -12,6 +13,7 @@ import net.minestom.server.entity.metadata.other.InteractionMeta
 import net.minestom.server.instance.Instance
 import net.minestom.server.item.ItemStack
 import net.minestom.server.item.Material
+import java.time.Duration
 
 data class RepoItem(val material: Material, val initialPrice: Int) {
     var price = initialPrice
@@ -20,12 +22,12 @@ data class RepoItem(val material: Material, val initialPrice: Int) {
     var isHolding = false
     var lastPosition: Pos? = null
         private set
+    var lastDecreased: Int = 0
+        private set
 
     val entity = ItemEntity()
     val proxy = Entity(EntityType.INTERACTION).apply {
-        meta<InteractionMeta> {
-            height = 0.8f; width = 0.6f
-        }
+        meta<InteractionMeta> { height = 0.8f; width = 0.6f }
         setBoundingBox(0.6, 0.8, 0.2)
         setTag(PARENT_TAG, this@RepoItem)
     }
@@ -38,7 +40,6 @@ data class RepoItem(val material: Material, val initialPrice: Int) {
                 itemStack = ItemStack.of(material)
             }
         }
-
         override fun teleport(pos: Pos) = super.teleport(pos).also {
             val prev = lastPosition
             lastPosition = pos
@@ -50,7 +51,11 @@ data class RepoItem(val material: Material, val initialPrice: Int) {
 
     fun decreasePrice() {
         if (!isAlive) return
-        price -= (initialPrice * 0.05).toInt()
+        val decrease = (initialPrice * 0.05).toInt()
+        price -= decrease
+        lastDecreased = decrease
+        MinecraftServer.getSchedulerManager().buildTask { lastDecreased = 0 }
+            .delay(Duration.ofSeconds(5)).schedule()
         if (price <= 0) despawn()
     }
 
