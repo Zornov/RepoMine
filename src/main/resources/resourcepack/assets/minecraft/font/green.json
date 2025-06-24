@@ -48,6 +48,13 @@
     },
     {
       "type": "bitmap",
+      "file": "font/green/dollar.png",
+      "ascent": 8,
+      "height": 8,
+      "chars": ["$"]
+    },
+    {
+      "type": "bitmap",
       "file": "font/green/digit_0.png",
       "ascent": 8,
       "height": 8,

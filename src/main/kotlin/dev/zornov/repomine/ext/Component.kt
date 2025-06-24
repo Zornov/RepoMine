@@ -26,7 +26,7 @@ fun Component.horizontalPadding(offset: Int): Component {
     require(offset in -20..20) { "Offset must be in range -20..20, got $offset" }
 
     val char = (0xE000 + (offset + 20)).toChar()
-    return append(Component.text(char))
+    return Component.text(char).append(this)
 }
 
 @ResourcePackOnly
