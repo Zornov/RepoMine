@@ -16,6 +16,7 @@ class RepoPlayerEntity(player: Player) : RepoEntity(EntityType.PUFFERFISH) {
     init {
         setInstance(player.instance, player.position).join()
         isInvisible = true
+        isInvulnerable = true
         team = NO_COLLISION_TEAM
         playBlinkingAnimation()
     }

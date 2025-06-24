@@ -1,4 +1,4 @@
-package dev.zornov.repomine.audio.plasmavoice.addon
+package dev.zornov.repomine.audio.plasmovoice.addon
 
 import com.google.common.cache.CacheBuilder
 import com.google.common.cache.CacheLoader
@@ -12,7 +12,6 @@ import net.minestom.server.MinecraftServer
 import su.plo.voice.api.addon.AddonInitializer
 import su.plo.voice.api.addon.annotation.Addon
 import su.plo.voice.api.audio.codec.AudioDecoder
-import su.plo.voice.api.encryption.Encryption
 import su.plo.voice.api.event.EventSubscribe
 import su.plo.voice.api.server.audio.capture.ProximityServerActivationHelper
 import su.plo.voice.api.server.event.audio.source.PlayerSpeakEndEvent
@@ -69,7 +68,10 @@ class VoiceListenerAddon(
 
         @EventSubscribe
         fun onClientConnected(event: UdpClientConnectedEvent) {
-            playerAudio[event.connection.player.createPlayerInfo().playerId] = AudioType.PLASMO_VOICE
+            val player = getRepoPlayer(event.connection.player.instance.uuid) ?: return
+            player.uuid.let {
+                playerAudio[it] = AudioType.PLASMO_VOICE
+            }
         }
 
         // TODO: Fix lol, break plasmovoice

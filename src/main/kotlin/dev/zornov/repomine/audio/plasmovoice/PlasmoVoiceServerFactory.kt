@@ -1,4 +1,4 @@
-package dev.zornov.repomine.audio.plasmavoice
+package dev.zornov.repomine.audio.plasmovoice
 
 import io.micronaut.context.annotation.Factory
 import io.micronaut.context.event.ShutdownEvent

@@ -2,10 +2,9 @@ package dev.zornov.repomine.audio
 
 import dev.zornov.repomine.audio.api.AudioBackend
 import dev.zornov.repomine.audio.api.AudioType
-import dev.zornov.repomine.audio.plasmavoice.PlasmoVoiceAudioBackend
+import dev.zornov.repomine.audio.plasmovoice.PlasmoVoiceAudioBackend
 import dev.zornov.repomine.audio.vanilla.VanillaAudioBackend
 import io.micronaut.context.annotation.Factory
-import jakarta.inject.Provider
 import jakarta.inject.Singleton
 import net.minestom.server.entity.Player
 import su.plo.voice.api.server.PlasmoVoiceServer
@@ -28,14 +27,14 @@ class AudioBackendFactory {
         )
     }
 
+
     @Singleton
     fun plasmoBackend(
         threads: ConcurrentHashMap<Player, MutableList<Thread>>,
-        voiceServerProvider: Provider<PlasmoVoiceServer>
+        voiceServer: PlasmoVoiceServer
     ): PlasmoVoiceAudioBackend {
-        val server = voiceServerProvider.get()
         return PlasmoVoiceAudioBackend(
-            voiceServer = server,
+            voiceServer = voiceServer,
             playerThreads = threads
         )
     }

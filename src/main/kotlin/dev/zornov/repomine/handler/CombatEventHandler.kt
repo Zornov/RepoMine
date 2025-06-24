@@ -12,7 +12,7 @@ class CombatEventHandler : EventListener {
     @EventHandler
     fun handle(event: EntityAttackEvent) {
         (event.target as? LivingEntity)?.damage(
-            EntityDamage.fromEntity(event.entity, 1f)
+            EntityDamage.fromEntity(event.entity, 0f)
         )
     }
 }
