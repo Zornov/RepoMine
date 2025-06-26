@@ -23,15 +23,15 @@ fun Component.bottomPadding(padding: Int): Component {
 
 @ResourcePackOnly
 fun Component.horizontalPadding(offset: Int): Component {
-    require(offset in -20..20) { "Offset must be in range -20..20, got $offset" }
+    require(offset in -250..250) { "Offset must be in range -250..250, got $offset" }
 
-    val char = (0xE000 + (offset + 20)).toChar()
+    val char = (0xE000 + (offset + 250)).toChar()
     return Component.text(char).append(this)
 }
 
 @ResourcePackOnly
 fun Component.withPerCharHorizontalPadding(offset: Int): Component {
-    require(offset in -20..20) { "Offset must be in range -20..20, got $offset" }
+    require(offset in -250..250) { "Offset must be in range -250..250, got $offset" }
 
     val builder = Component.text().style(this.style())
 

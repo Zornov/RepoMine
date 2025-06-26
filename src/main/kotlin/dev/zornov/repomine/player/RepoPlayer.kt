@@ -2,16 +2,10 @@ package dev.zornov.repomine.player
 
 import dev.zornov.repomine.entity.NO_COLLISION_TEAM
 import dev.zornov.repomine.entity.player.RepoPlayerEntity
-import dev.zornov.repomine.ext.bottomPadding
-import dev.zornov.repomine.ext.horizontalPadding
-import dev.zornov.repomine.ext.toKey
-import dev.zornov.repomine.ext.withPerCharHorizontalPadding
-import dev.zornov.repomine.input.pickup.PARENT_TAG
 import dev.zornov.repomine.item.RepoItem
 import net.kyori.adventure.text.Component
 import net.minestom.server.coordinate.Pos
 import net.minestom.server.coordinate.Vec
-import net.minestom.server.entity.EntityType
 import net.minestom.server.entity.Player
 import net.minestom.server.item.Material
 import net.minestom.server.network.player.GameProfile
@@ -39,50 +33,19 @@ class RepoPlayer(
         isAutoViewable = false
         team = NO_COLLISION_TEAM
         RepoItem(Material.DIAMOND, 100).spawnAt(instance, Pos(1.0, 41.0, 2.0))
-        entity = RepoPlayerEntity(this)
+//        entity = RepoPlayerEntity(this)
     }
 
     override fun update(time: Long) {
         super.update(time)
         currentItem?.takeIf { it.isAlive }?.let { item ->
             moveItemTowardLook(item)
-            val priceComponent = Component.text(item.price).font("green".toKey())
-                .bottomPadding(80)
-                .withPerCharHorizontalPadding(-1)
-                .append(
-                    Component.text("$").font("green".toKey())
-                        .bottomPadding(80)
-                        .horizontalPadding(2)
-                )
-            val decreasedComponent = if (item.lastDecreased > 0)
-                Component.text("-${item.lastDecreased}").font("red".toKey())
-                    .bottomPadding(70)
-                    .horizontalPadding(-18)
-                    .append(
-                        Component.text("$").font("red".toKey())
-                            .bottomPadding(70)
-                            .horizontalPadding(2)
-                    )
-            else Component.empty()
-            sendActionBar(priceComponent.append(decreasedComponent))
         } ?: showHoveredEntityPrice()
         entity.teleport(position.withPitch(0f))
     }
 
     fun showHoveredEntityPrice() {
-        val price = getLineOfSightEntity(5.0) { it.entityType == EntityType.INTERACTION }
-            ?.getTag(PARENT_TAG)?.price
-            ?.let {
-                Component.text(it).font("green".toKey())
-                    .bottomPadding(80)
-                    .withPerCharHorizontalPadding(-1)
-                    .append(
-                        Component.text("$").font("green".toKey())
-                            .bottomPadding(80)
-                            .horizontalPadding(2)
-                    )
-            }
-        sendActionBar(price ?: Component.empty())
+        sendActionBar(Component.empty())
     }
 
     fun moveItemTowardLook(item: RepoItem) {
