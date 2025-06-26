@@ -55,7 +55,7 @@ class RepoPlayer(
                         .horizontalPadding(2)
                 )
             val decreasedComponent = if (item.lastDecreased > 0)
-                Component.text("${item.lastDecreased}").font("red".toKey())
+                Component.text("-${item.lastDecreased}").font("red".toKey())
                     .bottomPadding(70)
                     .horizontalPadding(-18)
                     .append(
