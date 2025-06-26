@@ -3,7 +3,6 @@ package dev.zornov.repomine.player
 import dev.zornov.repomine.entity.NO_COLLISION_TEAM
 import dev.zornov.repomine.entity.player.RepoPlayerEntity
 import dev.zornov.repomine.item.RepoItem
-import net.kyori.adventure.text.Component
 import net.minestom.server.coordinate.Pos
 import net.minestom.server.coordinate.Vec
 import net.minestom.server.entity.Player
@@ -33,19 +32,15 @@ class RepoPlayer(
         isAutoViewable = false
         team = NO_COLLISION_TEAM
         RepoItem(Material.DIAMOND, 100).spawnAt(instance, Pos(1.0, 41.0, 2.0))
-//        entity = RepoPlayerEntity(this)
+        entity = RepoPlayerEntity(this)
     }
 
     override fun update(time: Long) {
         super.update(time)
         currentItem?.takeIf { it.isAlive }?.let { item ->
             moveItemTowardLook(item)
-        } ?: showHoveredEntityPrice()
+        }
         entity.teleport(position.withPitch(0f))
-    }
-
-    fun showHoveredEntityPrice() {
-        sendActionBar(Component.empty())
     }
 
     fun moveItemTowardLook(item: RepoItem) {
