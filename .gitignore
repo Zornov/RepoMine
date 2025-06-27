@@ -2,8 +2,6 @@
 /config/
 /tmp/
 
-/src/main/resources/bbmodel
-
 .idea/
 *.iml
 .gradle/

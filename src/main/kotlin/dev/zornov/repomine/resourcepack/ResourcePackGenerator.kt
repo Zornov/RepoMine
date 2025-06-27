@@ -31,7 +31,7 @@ class ResourcePackGenerator(
         if (mappingsFile.exists()) mappingsFile.deleteExisting()
 
         val config = PackBuilder.generate(
-            base.resolve("bbmodel"),
+            base.resolve("blockbench"),
             resourcepackTmp,
             modelsTmp
         )

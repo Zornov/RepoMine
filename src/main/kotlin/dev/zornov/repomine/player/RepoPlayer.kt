@@ -6,6 +6,7 @@ import dev.zornov.repomine.item.RepoItem
 import net.minestom.server.coordinate.Pos
 import net.minestom.server.coordinate.Vec
 import net.minestom.server.entity.Player
+import net.minestom.server.item.ItemStack
 import net.minestom.server.item.Material
 import net.minestom.server.network.player.GameProfile
 import net.minestom.server.network.player.PlayerConnection
