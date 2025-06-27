@@ -10,9 +10,9 @@ import kotlin.math.abs
 
 data class TextWidget(
     var text: Component,
-) : HudWidget() {
-    var verticalPadding: Int = 0
+    var verticalPadding: Int = 0,
     var horizontalPadding: Int = 0
+) : HudWidget() {
 
     val customData = hashMapOf<UUID, TextWidget>()
 

@@ -2,7 +2,6 @@ package dev.zornov.repomine.resourcepack.hud
 
 import dev.zornov.repomine.resourcepack.hud.builder.DisplayType
 import dev.zornov.repomine.resourcepack.hud.builder.HudScreen
-import dev.zornov.repomine.resourcepack.hud.builder.annotations.Position
 import dev.zornov.repomine.resourcepack.hud.builder.annotations.Widget
 import dev.zornov.repomine.resourcepack.hud.widget.TextWidget
 import io.micronaut.context.event.ApplicationEventListener
@@ -45,17 +44,13 @@ class HudService(
         val widgets = screen.javaClass.declaredFields
             .asSequence()
             .filter {
-                it.isAnnotationPresent(Widget::class.java) && it.isAnnotationPresent(Position::class.java)
+                it.isAnnotationPresent(Widget::class.java)
             }
             .mapNotNull { field ->
                 runCatching {
                     field.isAccessible = true
                     val widget = field.get(screen) as? TextWidget ?: return@mapNotNull null
                     if (!widget.isVisible) return@mapNotNull null
-                    field.getAnnotation(Position::class.java).also {
-                        widget.horizontalPadding = it.x
-                        widget.verticalPadding = it.y
-                    }
                     widget
                 }.getOrElse {
                     it.printStackTrace()

@@ -32,7 +32,7 @@ class RepoPlayer(
         isAutoViewable = false
         team = NO_COLLISION_TEAM
         RepoItem(Material.DIAMOND, 100).spawnAt(instance, Pos(1.0, 41.0, 2.0))
-//        entity = RepoPlayerEntity(this)
+        entity = RepoPlayerEntity(this)
     }
 
     override fun update(time: Long) {
@@ -40,7 +40,7 @@ class RepoPlayer(
         currentItem?.takeIf { it.isAlive }?.let { item ->
             moveItemTowardLook(item)
         }
-//        entity.teleport(position.withPitch(0f))
+        entity.teleport(position.withPitch(0f))
     }
 
     fun moveItemTowardLook(item: RepoItem) {

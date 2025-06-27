@@ -38,6 +38,8 @@ class PlayerSpawnHandler(
         scheduler.buildTask {
             screen.helloWorldText.modifyFor(player) {
                 text = Component.text("World!")
+                horizontalPadding = 250
+                verticalPadding = -50
             }
             hudService.updateScreen(player)
         }.delay(Duration.ofSeconds(10)).schedule()
