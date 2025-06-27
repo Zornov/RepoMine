@@ -1,7 +1,6 @@
 package dev.zornov.repomine.resourcepack.hud
 
 import dev.zornov.repomine.resourcepack.hud.widget.HudWidget
-import dev.zornov.repomine.resourcepack.hud.widget.TextWidget
 import io.micronaut.context.event.ApplicationEventListener
 import io.micronaut.context.event.StartupEvent
 import jakarta.inject.Singleton
@@ -76,11 +75,11 @@ class HudService(
         val text = Component.text()
 
         globalComponents.forEach { widget ->
-            text.append(widget.getComponent())
+            if (widget.isVisible) text.append(widget.getComponent())
         }
 
         playerComponents[player.uuid]?.forEach { widget ->
-            text.append(widget.getComponent())
+            if (widget.isVisible) text.append(widget.getComponent())
         }
 
         playerTextMap[player.uuid] = text.build()
@@ -95,9 +94,13 @@ class HudService(
     fun Player.addPlayerHudComponent(widget: HudWidget) {
         val list = playerComponents.computeIfAbsent(uuid) { LinkedList() }
         list.removeIf { it.id == widget.id }
+
+        widget.onUpdate = { updateActionBar(this) }
+
         list.add(widget)
         updateActionBar(this)
     }
+
 
     /**
      * Removes a HUD component from the player's action bar using its unique identifier.
@@ -123,27 +126,7 @@ class HudService(
      * @return the HUD component of type `T` with the given ID, or `null` if no matching component is found
      */
     inline fun <reified T : HudWidget> Player.getHudComponent(id: String): T? {
-        val widget = playerComponents[uuid]?.firstOrNull { it.id == id && it is T } as? T ?: return null
-
-        if (widget is TextWidget) {
-            return object : TextWidget(
-                widget.id,
-                widget.text,
-                widget.verticalPadding,
-                widget.horizontalPadding
-            ) {
-                override var text: Component
-                    get() = widget.text
-                    set(value) {
-                        widget.text = value
-                        updateActionBar(this@getHudComponent)
-                    }
-
-                override fun getComponent(): Component = widget.getComponent()
-            } as T
-        }
-
-        return widget
+        return playerComponents[uuid]?.firstOrNull { it.id == id && it is T } as? T
     }
 
     /**
@@ -155,9 +138,12 @@ class HudService(
      */
     fun addGlobalHudComponent(widget: HudWidget) {
         globalComponents.removeIf { it.id == widget.id }
+        widget.onUpdate = { updateAllPlayers() }
+
         globalComponents.add(widget)
         updateAllPlayers()
     }
+
 
     /**
      * Removes a global HUD component by its unique identifier. If the specified component is found
@@ -170,6 +156,17 @@ class HudService(
         if (globalComponents.removeIf { it.id == id }) {
             updateAllPlayers()
         }
+    }
+
+    /**
+     * Retrieves a global HUD component of the specified type and ID from the global HUD components.
+     *
+     * @param T The type of the HUD component to retrieve, which must extend `HudWidget`.
+     * @param id The unique identifier of the HUD component to retrieve.
+     * @return The HUD component of type `T` with the given ID, or `null` if no matching component is found.
+     */
+    inline fun <reified T : HudWidget> getGlobalHudComponent(id: String): T? {
+        return globalComponents.firstOrNull { it.id == id && it is T } as? T
     }
 
     /**

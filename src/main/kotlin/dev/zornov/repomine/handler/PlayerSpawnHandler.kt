@@ -38,14 +38,14 @@ class PlayerSpawnHandler(
         )
 
         hudService.run {
-            player.addPlayerHudComponent(welcomeText)
+            addGlobalHudComponent(welcomeText)
         }
 
         scheduler.buildTask {
             hudService.run {
-                player.getHudComponent<TextWidget>("welcome")?.text = Component.text("Hello")
+                getGlobalHudComponent<TextWidget>("welcome")?.text = Component.text("test")
             }
-        }.delay(Duration.ofSeconds(20)).schedule()
+        }.delay(Duration.ofSeconds(10)).schedule()
 
 
     }
