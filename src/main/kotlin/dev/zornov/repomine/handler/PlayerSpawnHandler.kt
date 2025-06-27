@@ -5,8 +5,8 @@ import dev.zornov.repomine.common.api.EventListener
 import dev.zornov.repomine.player.RepoPlayer
 import dev.zornov.repomine.resourcepack.ResourcePackService
 import dev.zornov.repomine.resourcepack.hud.HudService
-import dev.zornov.repomine.resourcepack.hud.widget.TextWidget
 import dev.zornov.repomine.scene.RepoScene
+import dev.zornov.repomine.scene.SceneHud
 import jakarta.inject.Singleton
 import net.kyori.adventure.text.Component
 import net.minestom.server.entity.GameMode
@@ -29,22 +29,17 @@ class PlayerSpawnHandler(
         player.gameMode = GameMode.SURVIVAL
         player.sendResourcePacks(rpServer.request)
 
-        scene.addPlayer(player)
-        val welcomeText = TextWidget(
-            id = "welcome",
-            Component.text("Добро пожаловать!"),
-            verticalPadding = -180,
-            horizontalPadding = 0
-        )
-
+//        scene.addPlayer(player)
+        val screen = SceneHud()
         hudService.run {
-            addGlobalHudComponent(welcomeText)
+            player.showScreen(screen)
         }
 
         scheduler.buildTask {
-            hudService.run {
-                getGlobalHudComponent<TextWidget>("welcome")?.text = Component.text("test")
+            screen.helloWorldText.modifyFor(player) {
+                text = Component.text("World!")
             }
+            hudService.updateScreen(player)
         }.delay(Duration.ofSeconds(10)).schedule()
 
 

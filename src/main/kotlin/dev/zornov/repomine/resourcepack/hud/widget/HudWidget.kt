@@ -1,15 +1,10 @@
 package dev.zornov.repomine.resourcepack.hud.widget
 
-import dev.zornov.repomine.resourcepack.hud.property.updatable
 import net.kyori.adventure.text.Component
+import java.util.*
 
-abstract class HudWidget(
-    val id: String
-) {
-    var isVisible by updatable(true)
+abstract class HudWidget {
+    var isVisible = true
 
-    abstract fun getComponent(): Component
-
-
-    var onUpdate: (() -> Unit)? = null
+    abstract fun getComponent(player: UUID): Component
 }

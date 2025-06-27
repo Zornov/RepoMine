@@ -3,7 +3,6 @@ package dev.zornov.repomine.item
 import dev.zornov.repomine.ext.meta
 import dev.zornov.repomine.input.pickup.PARENT_TAG
 import dev.zornov.repomine.math.RayTrace
-import net.minestom.server.MinecraftServer
 import net.minestom.server.coordinate.Pos
 import net.minestom.server.coordinate.Vec
 import net.minestom.server.entity.Entity
@@ -13,7 +12,6 @@ import net.minestom.server.entity.metadata.other.InteractionMeta
 import net.minestom.server.instance.Instance
 import net.minestom.server.item.ItemStack
 import net.minestom.server.item.Material
-import java.time.Duration
 
 data class RepoItem(val material: Material, val initialPrice: Int) {
     var price = initialPrice
@@ -21,8 +19,6 @@ data class RepoItem(val material: Material, val initialPrice: Int) {
         private set
     var isHolding = false
     var lastPosition: Pos? = null
-        private set
-    var lastDecreased: Int = 0
         private set
 
     val entity = ItemEntity()
@@ -53,9 +49,6 @@ data class RepoItem(val material: Material, val initialPrice: Int) {
         if (!isAlive) return
         val decrease = (initialPrice * 0.05).toInt()
         price -= decrease
-        lastDecreased = decrease
-        MinecraftServer.getSchedulerManager().buildTask { lastDecreased = 0 }
-            .delay(Duration.ofSeconds(5)).schedule()
         if (price <= 0) despawn()
     }
 
