@@ -2,4 +2,7 @@ package dev.zornov.repomine.resourcepack.hud.builder.annotations
 
 @Target(AnnotationTarget.FIELD)
 @Retention(AnnotationRetention.RUNTIME)
-annotation class Widget
+annotation class Position(
+    val vertical: Int = 0,
+    val horizontal: Int = 0
+)

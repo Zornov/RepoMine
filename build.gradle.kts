@@ -29,10 +29,11 @@ repositories {
 }
 
 dependencies {
-    // Micronaut Core
+    // Core
     implementation(libs.micronaut.inject)
     implementation(libs.micronaut.runtime)
     kapt(libs.micronaut.inject.java)
+    implementation(kotlin("reflect"))
 
     // Game-related
     implementation(libs.minestom)
