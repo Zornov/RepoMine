@@ -6,7 +6,7 @@ minestom = "1_21_5-8665dbe3f7"
 logback = "1.5.18"
 shadow-plugin = "9.0.0-beta10"
 worldseed = "11.4.1"
-plasmovoice = "2.1.5-SNAPSHOT"
+plasmovoice = "2.1.6"
 
 [libraries]
 micronaut-inject = { module = "io.micronaut:micronaut-inject", version.ref = "micronaut" }
