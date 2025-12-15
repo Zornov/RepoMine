@@ -2,7 +2,7 @@
 kotlin = "2.2.21"
 micronaut = "4.10.9"
 micronaut-plugin = "4.6.1"
-minestom = "1_21-9219e96f76"
+minestom = "461c56e749"
 logback = "1.5.21"
 shadow-plugin = "9.3.0"
 worldseed = "11.5.5"
