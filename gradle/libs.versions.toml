@@ -1,6 +1,6 @@
 [versions]
 kotlin = "2.3.0"
-micronaut = "4.10.9"
+micronaut = "4.10.12"
 micronaut-plugin = "4.6.1"
 minestom = "461c56e749"
 logback = "1.5.23"
